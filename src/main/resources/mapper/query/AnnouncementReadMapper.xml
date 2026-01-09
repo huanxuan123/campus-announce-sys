@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.campus.announce.mapper.query.AnnouncementReadMapper">
+
+    <insert id="insert">
+        INSERT INTO sys_announcement_read (announcement_id, user_id)
+        VALUES (#{announcementId}, #{userId})
+    </insert>
+
+    <delete id="delete">
+        DELETE FROM sys_announcement_read
+        WHERE announcement_id = #{announcementId} AND user_id = #{userId}
+    </delete>
+
+    <select id="countReadByAnnouncement" resultType="int">
+        SELECT COUNT(*) FROM sys_announcement_read WHERE announcement_id = #{announcementId}
+    </select>
+
+    <select id="countUnreadByUser" resultType="int">
+        SELECT COUNT(*)
+        FROM sys_announcement a
+        WHERE a.status = 1
+        AND a.scope = #{scope}
+        <if test="deptId != null">
+            AND (a.scope = 1 OR a.dept_id = #{deptId})
+        </if>
+        AND NOT EXISTS (
+            SELECT 1 FROM sys_announcement_read ar
+            WHERE ar.announcement_id = a.id AND ar.user_id = #{userId}
+        )
+    </select>
+
+    <select id="selectUnreadAnnouncements" resultType="com.campus.announce.entity.Announcement">
+        SELECT a.*,
+               u.real_name as publisher_name,
+               d.dept_name
+        FROM sys_announcement a
+        LEFT JOIN sys_user u ON a.publisher_id = u.id
+        LEFT JOIN sys_department d ON a.dept_id = d.id
+        WHERE a.status = 1
+        AND a.scope = #{scope}
+        <if test="deptId != null">
+            AND (a.scope = 1 OR a.dept_id = #{deptId})
+        </if>
+        AND NOT EXISTS (
+            SELECT 1 FROM sys_announcement_read ar
+            WHERE ar.announcement_id = a.id AND ar.user_id = #{userId}
+        )
+        ORDER BY a.publish_time DESC
+    </select>
+
+    <select id="isRead" resultType="boolean">
+        SELECT COUNT(*) > 0 FROM sys_announcement_read
+        WHERE announcement_id = #{announcementId} AND user_id = #{userId}
+    </select>
+
+    <select id="selectReadStatistics" resultType="map">
+        SELECT
+            (SELECT COUNT(*) FROM sys_announcement_read WHERE announcement_id = #{announcementId}) as read_count,
+            (SELECT COUNT(*) FROM sys_user WHERE user_type IN (3,4) AND status = 1) as total_count
+    </select>
+
+</mapper>

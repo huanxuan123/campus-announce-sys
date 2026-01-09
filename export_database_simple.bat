@@ -23,7 +23,7 @@ echo Exporting database...
 echo Please enter MySQL root password:
 echo.
 
-"%MYSQL_PATH%" -u root -p %DATABASE% --skip-column-names --no-create-db > "%OUTPUT_DIR%\campus_announce_%TIMESTAMP%.sql"
+"%MYSQL_PATH%" -u root -p %DATABASE% > "%OUTPUT_DIR%\campus_announce_%TIMESTAMP%.sql"
 
 if %ERRORLEVEL% EQU 0 (
     echo.

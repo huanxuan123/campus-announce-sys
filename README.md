@@ -132,6 +132,28 @@ campus-announce-sys/
 
 ## 数据库初始化
 
+### 环境变量配置（重要）
+
+在执行数据库初始化之前，请确保正确配置了MySQL环境变量：
+
+1. **找到MySQL安装路径**：
+   - MySQL Server的bin目录通常在：`I:\MySQL\MySQL Server 8.0\bin`
+   - 注意：MySQL Shell和MySQL Server是两个不同的产品，路径也不同
+
+2. **添加到系统环境变量**：
+   - 右键点击"此电脑" → "属性"
+   - 点击"高级系统设置" → "环境变量"
+   - 在"系统变量"中找到 `Path`，点击"编辑"
+   - 点击"新建"，添加：`I:\MySQL\MySQL Server 8.0\bin`
+   - 点击"确定"保存所有更改
+
+3. **验证配置**：
+   ```bash
+   # 关闭所有终端窗口，重新打开
+   mysql --version
+   ```
+   如果显示MySQL版本信息，说明配置成功。
+
 ### 方法1：使用批处理文件（推荐）
 
 项目根目录提供了批处理文件 `init_database.bat`，可以快速初始化数据库：
@@ -156,6 +178,10 @@ CREATE DATABASE campus_announce DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_un
 ```bash
 # 使用MySQL命令行工具（需要配置PATH环境变量）
 mysql -u root -p campus_announce < src/main/resources/sql/init.sql
+
+# 或者使用英文版本（避免编码问题）
+mysql -u root -p campus_announce < init_database_en.sql
+```
 
 # 或者使用完整路径
 "I:\MySQL\MySQL Server 8.0\bin\mysql.exe" -u root -p campus_announce < src/main/resources/sql/init.sql

@@ -132,6 +132,21 @@ campus-announce-sys/
 
 ## 数据库初始化
 
+### 方法1：使用批处理文件（推荐）
+
+项目根目录提供了批处理文件 `init_database.bat`，可以快速初始化数据库：
+
+```bash
+# Windows系统
+init_database.bat
+```
+
+执行后会提示输入MySQL root密码，输入后自动完成数据库和表的创建。
+
+**注意**：如果MySQL安装路径不是 `I:\MySQL\MySQL Server 8.0\bin\mysql.exe`，请编辑 `init_database.bat` 文件，修改第8行的 `MYSQL_PATH` 变量为你实际的MySQL安装路径。
+
+### 方法2：手动执行SQL脚本
+
 1. 创建数据库:
 ```sql
 CREATE DATABASE campus_announce DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -139,11 +154,27 @@ CREATE DATABASE campus_announce DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_un
 
 2. 执行初始化脚本:
 ```bash
+# 使用MySQL命令行工具（需要配置PATH环境变量）
 mysql -u root -p campus_announce < src/main/resources/sql/init.sql
+
+# 或者使用完整路径
+"I:\MySQL\MySQL Server 8.0\bin\mysql.exe" -u root -p campus_announce < src/main/resources/sql/init.sql
 ```
 
 3. 修改数据库配置:
 编辑 `src/main/resources/jdbc.properties`，修改数据库连接信息
+
+### 配置数据库连接
+
+复制 `jdbc.properties.example` 为 `jdbc.properties`，然后修改数据库连接信息：
+
+```properties
+jdbc.url=jdbc:mysql://localhost:3306/campus_announce?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+jdbc.username=root
+jdbc.password=your_password_here
+```
+
+**注意**：`jdbc.properties` 文件已添加到 `.gitignore`，不会被提交到Git，保护你的数据库密码安全。
 
 ## 默认账号
 

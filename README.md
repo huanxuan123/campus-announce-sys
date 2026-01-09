@@ -132,6 +132,45 @@ campus-announce-sys/
 
 ## 数据库初始化
 
+### 环境变量配置（重要）
+
+在执行数据库初始化之前，请确保正确配置了MySQL环境变量：
+
+1. **找到MySQL安装路径**：
+   - MySQL Server的bin目录通常在：`I:\MySQL\MySQL Server 8.0\bin`
+   - 注意：MySQL Shell和MySQL Server是两个不同的产品，路径也不同
+
+2. **添加到系统环境变量**：
+   - 右键点击"此电脑" → "属性"
+   - 点击"高级系统设置" → "环境变量"
+   - 在"系统变量"中找到 `Path`，点击"编辑"
+   - 点击"新建"，添加：`I:\MySQL\MySQL Server 8.0\bin`
+   - 点击"确定"保存所有更改
+
+3. **验证配置**：
+   ```bash
+   # 关闭所有终端窗口，重新打开
+   mysql --version
+   ```
+   如果显示MySQL版本信息，说明配置成功。
+
+### 数据库初始化方法
+
+#### 方法1：使用批处理文件（推荐）
+
+项目根目录提供了批处理文件 `init_database.bat`，可以快速初始化数据库：
+
+```bash
+# Windows系统
+init_database.bat
+```
+
+执行后会提示输入MySQL root密码，输入后自动完成数据库和表的创建。
+
+**注意**：如果MySQL安装路径不是 `I:\MySQL\MySQL Server 8.0\bin\mysql.exe`，请编辑 `init_database.bat` 文件，修改第8行的 `MYSQL_PATH` 变量为你实际的MySQL安装路径。
+
+#### 方法2：手动执行SQL脚本
+
 1. 创建数据库:
 ```sql
 CREATE DATABASE campus_announce DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -139,11 +178,67 @@ CREATE DATABASE campus_announce DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_un
 
 2. 执行初始化脚本:
 ```bash
+# 使用MySQL命令行工具（需要配置PATH环境变量）
 mysql -u root -p campus_announce < src/main/resources/sql/init.sql
+
+# 或者使用英文版本（避免编码问题）
+mysql -u root -p campus_announce < init_database_en.sql
 ```
 
-3. 修改数据库配置:
-编辑 `src/main/resources/jdbc.properties`，修改数据库连接信息
+#### 方法3：从备份文件导入（快速）
+
+如果项目负责人已经导出数据库并分享了备份文件：
+
+```bash
+.\import_database.bat
+# 选择选项2：从备份文件导入
+```
+
+#### 验证数据库是否创建成功：
+
+```bash
+mysql -u root -p campus_announce -e "SHOW TABLES;"
+```
+
+应该看到6张表：
+- sys_department
+- sys_user
+- sys_announcement
+- sys_attachment
+- sys_announcement_read
+- sys_config
+
+### 数据库导出（项目负责人）
+
+项目负责人可以使用以下脚本导出数据库：
+
+```bash
+# 方法1：使用批处理文件（推荐）
+.\export_database_simple.bat
+
+# 方法2：使用PowerShell
+powershell -ExecutionPolicy Bypass -File export_database.ps1
+```
+
+导出的SQL文件会保存在 `database_backup` 目录中，文件名格式：`campus_announce_YYYYMMDD_HHMMSS.sql`
+
+### 数据库导入（团队成员）
+
+团队成员克隆项目后，可以使用以下方式导入数据库：
+
+```bash
+# 方法1：使用批处理文件（推荐）
+.\import_database.bat
+
+# 方法2：使用PowerShell
+powershell -ExecutionPolicy Bypass -File import_database.ps1
+```
+
+导入时可以选择：
+- 选项1：从项目中的SQL文件导入（init.sql）
+- 选项2：从备份文件导入（快速）
+
+### 配置数据库连接
 
 ## 默认账号
 

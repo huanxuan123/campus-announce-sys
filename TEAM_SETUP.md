@@ -35,6 +35,13 @@ mysql -u root -p -e "CREATE DATABASE campus_announce DEFAULT CHARACTER SET utf8m
 mysql -u root -p campus_announce < init_database_en.sql
 ```
 
+**方法3：从备份文件导入（快速）**
+```bash
+# 如果项目负责人已经导出数据库并分享了备份文件
+.\import_database.bat
+# 选择选项2：从备份文件导入
+```
+
 **验证数据库是否创建成功：**
 ```bash
 mysql -u root -p campus_announce -e "SHOW TABLES;"

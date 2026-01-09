@@ -75,19 +75,34 @@ Render提供免费的PostgreSQL数据库，但你的项目使用MySQL。有两�
    - 需要修改JDBC驱动和连接字符串
    - 或者使用MySQL兼容模式
 
-#### 选项B：使用外部MySQL（推荐）
+#### 选项B：使用Railway MySQL（推荐）
 
-1. **创建MySQL数据库**：
-   - 推荐使用：PlanetScale（免费层）
-   - 访问：https://planetscale.com/
-   - 使用GitHub账号登录
-   - 创建免费数据库
-   - 获取连接信息
+详细步骤请查看：[RAILWAY_MYSQL.md](RAILWAY_MYSQL.md)
 
-2. **或者使用Railway MySQL**：
+**快速步骤**：
+
+1. **创建Railway账号**：
    - 访问：https://railway.app/
-   - 创建MySQL数据库
-   - 获取连接信息
+   - 使用GitHub账号登录
+
+2. **创建MySQL数据库**：
+   - 点击"+ New Project"
+   - 选择"Create from Scratch"
+   - 点击"+ New Service"
+   - 搜索"MySQL"
+   - 选择"MySQL"并添加
+
+3. **初始化数据库**：
+   - 打开MySQL服务的Console标签
+   - 点击"MySQL CLI"
+   - 执行init_database_en.sql中的SQL语句
+
+4. **获取连接信息**：
+   - Host: `containers-us-west-1.railway.app`
+   - Port: `3306`
+   - Database: `railway`（或你创建的数据库名）
+   - Username: `root`
+   - Password: 点击"Show"显示密码
 
 ### 步骤4：配置环境变量
 

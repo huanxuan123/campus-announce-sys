@@ -179,18 +179,34 @@ git clone <repository-url>
 cd campus-announce-sys
 ```
 
-2. 修改数据库配置:
-编辑 `src/main/resources/jdbc.properties`
+2. 初始化数据库（必需！）
+```bash
+# 方法1：使用批处理文件（推荐）
+init_database.bat
 
-3. 编译项目:
+# 方法2：手动执行SQL
+mysql -u root -p -e "CREATE DATABASE campus_announce DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+mysql -u root -p campus_announce < init_database_en.sql
+```
+
+3. 修改数据库配置:
+```bash
+# 复制配置文件模板
+copy src\main\resources\jdbc.properties.example src\main\resources\jdbc.properties
+
+# 编辑jdbc.properties，修改数据库密码
+# jdbc.password=你的MySQL密码
+```
+
+4. 编译项目:
 ```bash
 mvn clean package
 ```
 
-4. 部署到Tomcat:
+5. 部署到Tomcat:
 将 `target/campus-announce-sys.war` 部署到Tomcat的webapps目录
 
-5. 访问系统:
+6. 访问系统:
 ```
 http://localhost:8080/campus-announce-sys/
 ```

@@ -1,7 +1,7 @@
 jdbc.driver=com.mysql.cj.jdbc.Driver
 jdbc.url=jdbc:mysql://localhost:3306/campus_announce?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
 jdbc.username=root
-jdbc.password=your_password_here
+jdbc.password=123123123123mX
 
 druid.initialSize=5
 druid.minIdle=5

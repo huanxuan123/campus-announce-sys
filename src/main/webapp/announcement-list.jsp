@@ -506,9 +506,9 @@
                         <i class="fas fa-user-circle"></i>
                         <span>${sessionScope.user.realName}</span>
                     </div>
-                    <a href="${pageContext.request.contextPath}/api/auth/logout" class="btn btn-secondary">
+                    <button onclick="logout()" class="btn btn-secondary">
                         <i class="fas fa-sign-out-alt"></i> 退出
-                    </a>
+                    </button>
                 </div>
             </div>
         </div>
@@ -640,6 +640,21 @@
         
         function topAnnouncement(id) {
             console.log('Top announcement:', id);
+        }
+        
+        function logout() {
+            if (confirm('确定要退出登录吗？')) {
+                fetch('${pageContext.request.contextPath}/api/logout')
+                    .then(response => response.json())
+                    .then(data => {
+                        alert('退出成功');
+                        window.location.href = '${pageContext.request.contextPath}/login.jsp';
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('退出失败');
+                    });
+            }
         }
     </script>
 </body>

@@ -29,6 +29,12 @@
         </div>
     </div>
 
+    <!-- 引入通用工具和业务逻辑 -->
+    <script>
+        // 设置全局配置
+        var contextPath = '${pageContext.request.contextPath}';
+    </script>
+    <script src="${pageContext.request.contextPath}/static/js/common.js"></script>
     <script src="${pageContext.request.contextPath}/static/js/forgot-password.js"></script>
 </body>
 </html>

@@ -1,4 +1,5 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" 
+         buffer="64kb" autoFlush="true" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -6,8 +7,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>公告列表 - 校园公告系统</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- 使用jsDelivr CDN，移除integrity避免校验失败 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" 
+          crossorigin="anonymous"
+          onerror="this.onerror=null; this.href=''; console.warn('Font Awesome CDN加载失败，将使用Unicode字符代替');">
     <style>
+        /* 备用图标样式 - 如果Font Awesome加载失败，使用Unicode字符 */
+        .icon-fallback {
+            display: inline-block;
+            font-style: normal;
+            font-weight: normal;
+            line-height: 1;
+        }
+        
+        /* 确保即使Font Awesome未加载，页面也能正常显示 */
+        .fas, .fa {
+            display: inline-block;
+            font-style: normal;
+            font-variant: normal;
+            text-rendering: auto;
+            line-height: 1;
+        }
+        
+        /* 如果Font Awesome未加载，使用Unicode字符作为备用 */
+        .fa-bullhorn::before { content: '📢'; }
+        .fa-user-circle::before { content: '👤'; }
+        .fa-sign-out-alt::before { content: '🚪'; }
+        .fa-filter::before { content: '🔍'; }
+        .fa-th::before { content: '☰'; }
+        .fa-info-circle::before { content: 'ℹ️'; }
+        .fa-calendar::before { content: '📅'; }
+        .fa-ellipsis-h::before { content: '⋯'; }
+        .fa-search::before { content: '🔍'; }
+        .fa-spinner::before { content: '⏳'; }
+        .fa-inbox::before { content: '📥'; }
+        .fa-user::before { content: '👤'; }
+        .fa-eye::before { content: '👁️'; }
+        .fa-exclamation-circle::before { content: '⚠️'; }
+        .fa-redo::before { content: '🔄'; }
+        .fa-sign-in-alt::before { content: '🔑'; }
+        
         * {
             margin: 0;
             padding: 0;
@@ -504,9 +543,9 @@
                 <div class="header-actions">
                     <div class="user-card">
                         <i class="fas fa-user-circle"></i>
-                        <span>${sessionScope.user.realName}</span>
+                        <span id="userName">加载中...</span>
                     </div>
-                    <button onclick="logout()" class="btn btn-secondary">
+                    <button onclick="AnnouncementList.logout()" class="btn btn-secondary">
                         <i class="fas fa-sign-out-alt"></i> 退出
                     </button>
                 </div>
@@ -552,7 +591,7 @@
                             <option value="2">活动</option>
                             <option value="3">其他</option>
                         </select>
-                        <button class="btn-search" onclick="searchAnnouncements()">
+                        <button class="btn-search" onclick="AnnouncementList.searchAnnouncements()">
                             <i class="fas fa-search"></i> 搜索
                         </button>
                     </div>
@@ -561,164 +600,21 @@
                 <!-- Announcements Grid -->
                 <div class="announcements" id="announcementsList">
                     <div class="empty-state">
-                        <i class="fas fa-spinner"></i>
-                        <h3>加载中...</h3>
-                        <p>请稍候</p>
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <h3>正在加载公告...</h3>
+                        <p>请稍候，如果长时间无响应，请检查浏览器控制台</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     
+    <!-- 引入通用工具和业务逻辑 -->
     <script>
-        let currentAnnouncements = [];
-        
-        // 页面加载时获取公告数据
-        document.addEventListener('DOMContentLoaded', function() {
-            loadAnnouncements();
-        });
-        
-        function loadAnnouncements() {
-            fetch('${pageContext.request.contextPath}/api/announcement/list')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.code === 200 && data.data) {
-                        currentAnnouncements = data.data;
-                        renderAnnouncements(currentAnnouncements);
-                    } else {
-                        showError('加载公告失败');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showError('加载公告失败：' + error.message);
-                });
-        }
-        
-        function renderAnnouncements(announcements) {
-            const container = document.getElementById('announcementsList');
-            
-            if (!announcements || announcements.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-inbox"></i>
-                        <h3>暂无公告</h3>
-                        <p>当前还没有公告内容，敬请期待</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            const html = announcements.map(ann => `
-                <div class="announcement-card ${ann.isTop == 1 ? 'is-top' : ''}">
-                    <div class="announcement-header">
-                        <span class="announcement-type type-${ann.announcementType}">
-                            ${getTypeLabel(ann.announcementType)}
-                        </span>
-                    </div>
-                    
-                    <h3 class="announcement-title">
-                        <a href="${pageContext.request.contextPath}/announcement/\${ann.id}">
-                            \${ann.title}
-                        </a>
-                    </h3>
-                    
-                    <div class="announcement-meta">
-                        <span class="meta-item">
-                            <i class="fas fa-user"></i> \${ann.publisherName || '系统管理员'}
-                        </span>
-                        <span class="meta-item">
-                            <i class="fas fa-calendar"></i> \${formatDate(ann.publishTime)}
-                        </span>
-                        <span class="meta-item">
-                            <i class="fas fa-eye"></i> \${ann.viewCount || 0} 浏览
-                        </span>
-                    </div>
-                    
-                    <div class="announcement-content">
-                        \${ann.content ? ann.content.substring(0, 120) + '...' : ''}
-                    </div>
-                    
-                    <div class="announcement-footer">
-                        <a href="${pageContext.request.contextPath}/announcement/\${ann.id}" class="btn btn-sm" style="background: var(--primary); color: white;">
-                            <i class="fas fa-eye"></i> 查看详情
-                        </a>
-                    </div>
-                </div>
-            `).join('');
-            
-            container.innerHTML = html;
-        }
-        
-        function getTypeLabel(type) {
-            switch(type) {
-                case 1: return '📢 通知';
-                case 2: return '🎉 活动';
-                case 3: return '📌 其他';
-                default: return '📰 公告';
-            }
-        }
-        
-        function formatDate(dateString) {
-            if (!dateString) return '';
-            const date = new Date(dateString);
-            return date.toLocaleDateString('zh-CN', { 
-                year: 'numeric', 
-                month: '2-digit', 
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        }
-        
-        function searchAnnouncements() {
-            const keyword = document.getElementById('searchKeyword').value.toLowerCase();
-            const type = document.getElementById('typeFilter').value;
-            
-            let filtered = currentAnnouncements;
-            
-            if (keyword) {
-                filtered = filtered.filter(ann => 
-                    ann.title.toLowerCase().includes(keyword) || 
-                    (ann.content && ann.content.toLowerCase().includes(keyword))
-                );
-            }
-            
-            if (type) {
-                filtered = filtered.filter(ann => ann.announcementType == type);
-            }
-            
-            renderAnnouncements(filtered);
-        }
-        
-        function deleteAnnouncement(id) {
-            if (confirm('确定要删除这条公告吗？')) {
-                console.log('Delete announcement:', id);
-            }
-        }
-        
-        function topAnnouncement(id) {
-            console.log('Top announcement:', id);
-        }
-        
-        function logout() {
-            if (confirm('确定要退出登录吗？')) {
-                fetch('${pageContext.request.contextPath}/api/logout')
-                    .then(response => response.json())
-                    .then(data => {
-                        alert('退出成功');
-                        window.location.href = '${pageContext.request.contextPath}/login.jsp';
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('退出失败');
-                    });
-            }
-        }
-        
-        function showError(message) {
-            alert(message);
-        }
+        // 设置全局配置
+        var contextPath = '${pageContext.request.contextPath}';
     </script>
+    <script src="${pageContext.request.contextPath}/static/js/common.js"></script>
+    <script src="${pageContext.request.contextPath}/static/js/announcement-list.js"></script>
 </body>
 </html>

@@ -33,13 +33,12 @@
         </div>
     </div>
 
+    <!-- 引入通用工具和业务逻辑 -->
     <script>
-        const token = new URLSearchParams(window.location.search).get('token');
-        if (!token) {
-            alert('无效的重置链接');
-            window.location.href = 'login.jsp';
-        }
+        // 设置全局配置
+        var contextPath = '${pageContext.request.contextPath}';
     </script>
+    <script src="${pageContext.request.contextPath}/static/js/common.js"></script>
     <script src="${pageContext.request.contextPath}/static/js/reset-password.js"></script>
 </body>
 </html>

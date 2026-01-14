@@ -1,13 +1,63 @@
-document.addEventListener('DOMContentLoaded', function() {
-    const registerForm = document.getElementById('registerForm');
-    const messageDiv = document.getElementById('message');
-    const deptSelect = document.getElementById('deptId');
+/**
+ * 注册页面业务逻辑
+ * 使用统一的common.js工具类
+ */
 
-    loadDepartments();
-
-    registerForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
+// 注册管理
+const RegisterPage = {
+    departments: [],
+    
+    /**
+     * 初始化
+     */
+    init: function() {
+        Logger.log('注册页面初始化');
+        this.loadDepartments();
+        this.bindEvents();
+    },
+    
+    /**
+     * 绑定事件
+     */
+    bindEvents: function() {
+        const registerForm = document.getElementById('registerForm');
+        if (registerForm) {
+            registerForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.handleRegister();
+            });
+        }
+    },
+    
+    /**
+     * 加载部门列表
+     */
+    loadDepartments: function() {
+        ApiClient.get('/department/list')
+            .then(data => {
+                if (data.data) {
+                    this.departments = data.data;
+                    const deptSelect = document.getElementById('deptId');
+                    if (deptSelect) {
+                        deptSelect.innerHTML = '<option value="">请选择部门</option>';
+                        data.data.forEach(dept => {
+                            const option = document.createElement('option');
+                            option.value = dept.id;
+                            option.textContent = dept.deptName;
+                            deptSelect.appendChild(option);
+                        });
+                    }
+                }
+            })
+            .catch(error => {
+                Logger.error('加载部门列表失败', error);
+            });
+    },
+    
+    /**
+     * 处理注册
+     */
+    handleRegister: function() {
         const username = document.getElementById('username').value.trim();
         const password = document.getElementById('password').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
@@ -19,17 +69,17 @@ document.addEventListener('DOMContentLoaded', function() {
         const phone = document.getElementById('phone').value.trim();
         
         if (!username || !password || !confirmPassword || !realName || !userType || !deptId) {
-            showMessage('请填写必填项', 'error');
+            ErrorHandler.showError('请填写必填项', 'message');
             return;
         }
         
         if (password !== confirmPassword) {
-            showMessage('两次输入的密码不一致', 'error');
+            ErrorHandler.showError('两次输入的密码不一致', 'message');
             return;
         }
         
         if (password.length < 6) {
-            showMessage('密码长度不能少于6位', 'error');
+            ErrorHandler.showError('密码长度不能少于6位', 'message');
             return;
         }
         
@@ -45,57 +95,36 @@ document.addEventListener('DOMContentLoaded', function() {
             status: 1
         };
         
-        fetch('/api/register', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(registerData)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.code === 200) {
-                showMessage('注册成功，正在跳转到登录页面...', 'success');
-                setTimeout(function() {
-                    window.location.href = '/login.jsp';
+        Logger.log('尝试注册', { username });
+        
+        ApiClient.post('/register', registerData)
+            .then(() => {
+                Logger.log('注册成功', { username });
+                ErrorHandler.showSuccess('注册成功，正在跳转到登录页面...', 'message');
+                setTimeout(() => {
+                    const basePath = AppConfig.apiBaseUrl.replace('/api', '') || '';
+                    window.location.href = basePath + '/login.jsp';
                 }, 1500);
-            } else {
-                showMessage(data.message || '注册失败', 'error');
-            }
-        })
-        .catch(error => {
-            showMessage('注册失败：' + error.message, 'error');
-        });
-    });
-
-    function loadDepartments() {
-        fetch('/api/department/list')
-            .then(response => response.json())
-            .then(data => {
-                if (data.code === 200 && data.data) {
-                    deptSelect.innerHTML = '<option value="">请选择部门</option>';
-                    data.data.forEach(dept => {
-                        const option = document.createElement('option');
-                        option.value = dept.id;
-                        option.textContent = dept.deptName;
-                        deptSelect.appendChild(option);
-                    });
-                }
             })
             .catch(error => {
-                console.error('加载部门列表失败:', error);
+                Logger.error('注册失败', error);
+                ErrorHandler.showError(error.message || '注册失败', 'message');
             });
     }
+};
 
-    function showMessage(msg, type) {
-        messageDiv.textContent = msg;
-        messageDiv.className = 'message ' + type;
-        messageDiv.style.display = 'block';
-        
-        if (type === 'success') {
-            setTimeout(function() {
-                messageDiv.style.display = 'none';
-            }, 3000);
-        }
+// 页面加载完成后初始化
+document.addEventListener('DOMContentLoaded', function() {
+    // 设置API基础URL
+    if (typeof contextPath !== 'undefined' && contextPath) {
+        AppConfig.apiBaseUrl = contextPath + '/api';
+    } else {
+        AppConfig.apiBaseUrl = '/api';
+        Logger.warn('未找到contextPath，使用默认值 /api');
     }
+    
+    Logger.log('API基础URL已设置', AppConfig.apiBaseUrl);
+    
+    // 初始化注册页面
+    RegisterPage.init();
 });

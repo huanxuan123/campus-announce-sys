@@ -123,37 +123,12 @@
         </div>
     </div>
     
+    <!-- 引入通用工具和业务逻辑 -->
     <script>
-        fetch('/api/currentUser')
-            .then(response => response.json())
-            .then(data => {
-                if (data.code === 200 && data.data) {
-                    document.getElementById('userName').textContent = '欢迎，' + data.data.realName;
-                } else {
-                    window.location.href = '/login.jsp';
-                }
-            })
-            .catch(error => {
-                console.error('获取用户信息失败:', error);
-                window.location.href = '/login.jsp';
-            });
-        
-        function logout() {
-            if (confirm('确定要退出登录吗？')) {
-                fetch('/api/logout', {
-                    method: 'POST'
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.code === 200) {
-                        window.location.href = '/login.jsp';
-                    }
-                })
-                .catch(error => {
-                    console.error('退出登录失败:', error);
-                });
-            }
-        }
+        // 设置全局配置
+        var contextPath = '${pageContext.request.contextPath}';
     </script>
+    <script src="${pageContext.request.contextPath}/static/js/common.js"></script>
+    <script src="${pageContext.request.contextPath}/static/js/index.js"></script>
 </body>
 </html>

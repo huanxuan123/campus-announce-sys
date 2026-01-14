@@ -6,6 +6,8 @@ import com.campus.announce.mapper.user.PasswordResetTokenMapper;
 import com.campus.announce.mapper.user.UserMapper;
 import com.campus.announce.service.EmailService;
 import com.campus.announce.service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +21,8 @@ import java.util.UUID;
 @Service
 public class UserServiceImpl implements UserService {
 
+    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+
     @Autowired
     private UserMapper userMapper;
 
@@ -30,32 +34,37 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User login(String username, String password) {
+        if (username == null || password == null) {
+            logger.warn("登录失败：用户名或密码为空");
+            return null;
+        }
+        
+        // 清理输入
+        username = username.trim();
+        password = password.trim();
+        
         User user = userMapper.selectByUsername(username);
         if (user == null) {
-            System.out.println("登录失败：用户不存在 - " + username);
+            logger.warn("登录失败：用户不存在 - {}", username);
             return null;
         }
         
         String dbPassword = user.getPassword();
-        String inputPassword = password;
+        if (dbPassword == null) {
+            logger.error("登录失败：数据库密码为空 - 用户ID: {}", user.getId());
+            return null;
+        }
         
-        System.out.println("登录调试 - 用户名: " + username);
-        System.out.println("登录调试 - 数据库密码: [" + dbPassword + "] 长度: " + dbPassword.length());
-        System.out.println("登录调试 - 输入密码: [" + inputPassword + "] 长度: " + inputPassword.length());
-        System.out.println("登录调试 - 密码是否相等: " + inputPassword.equals(dbPassword));
-        System.out.println("登录调试 - trim后是否相等: " + inputPassword.trim().equals(dbPassword.trim()));
+        // 清理数据库密码（去除前后空格）
+        dbPassword = dbPassword.trim();
         
-        if (inputPassword.equals(dbPassword)) {
-            System.out.println("登录成功: " + username);
+        // 比较密码
+        if (password.equals(dbPassword)) {
+            logger.info("登录成功: {}", username);
             return user;
         }
         
-        if (inputPassword.trim().equals(dbPassword.trim())) {
-            System.out.println("登录成功（trim后）: " + username);
-            return user;
-        }
-        
-        System.out.println("登录失败：密码不匹配 - " + username);
+        logger.warn("登录失败：密码不匹配 - {}", username);
         return null;
     }
 

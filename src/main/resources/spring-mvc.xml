@@ -53,19 +53,21 @@
     <mvc:view-controller path="/login.jsp" view-name="forward:/login.jsp"/>
     <mvc:view-controller path="/register.jsp" view-name="forward:/register.jsp"/>
     <mvc:view-controller path="/forgot-password.jsp" view-name="forward:/forgot-password.jsp"/>
+    <mvc:view-controller path="/reset-password.jsp" view-name="forward:/reset-password.jsp"/>
+    <mvc:view-controller path="/announcement-list.jsp" view-name="forward:/announcement-list.jsp"/>
+    <mvc:view-controller path="/index.jsp" view-name="forward:/index.jsp"/>
+    <mvc:view-controller path="/profile.jsp" view-name="forward:/profile.jsp"/>
+    <mvc:view-controller path="/user-list.jsp" view-name="forward:/user-list.jsp"/>
     <mvc:view-controller path="/diagnostics.jsp" view-name="forward:/diagnostics.jsp"/>
 
     <mvc:interceptors>
         <mvc:interceptor>
             <mvc:mapping path="/**"/>
+            <!-- 排除静态资源、API接口和公开页面 -->
             <mvc:exclude-mapping path="/static/**"/>
             <mvc:exclude-mapping path="/uploads/**"/>
             <mvc:exclude-mapping path="/api/**"/>
-            <mvc:exclude-mapping path="/login.jsp"/>
-            <mvc:exclude-mapping path="/register.jsp"/>
-            <mvc:exclude-mapping path="/forgot-password.jsp"/>
-            <mvc:exclude-mapping path="/reset-password.jsp"/>
-            <mvc:exclude-mapping path="/diagnostics.jsp"/>
+            <mvc:exclude-mapping path="/*.jsp"/>
             <mvc:exclude-mapping path="/favicon.ico"/>
             <bean class="com.campus.announce.interceptor.LoginInterceptor"/>
         </mvc:interceptor>

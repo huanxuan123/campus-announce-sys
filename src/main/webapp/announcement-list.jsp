@@ -560,76 +560,135 @@
                 
                 <!-- Announcements Grid -->
                 <div class="announcements" id="announcementsList">
-                    <c:choose>
-                        <c:when test="${empty announcements}">
-                            <div class="empty-state">
-                                <i class="fas fa-inbox"></i>
-                                <h3>暂无公告</h3>
-                                <p>当前还没有公告内容，敬请期待</p>
-                            </div>
-                        </c:when>
-                        <c:otherwise>
-                            <c:forEach var="announcement" items="${announcements}">
-                                <div class="announcement-card ${announcement.isTop == 1 ? 'is-top' : ''}">
-                                    <div class="announcement-header">
-                                        <span class="announcement-type type-${announcement.announcementType}">
-                                            <c:if test="${announcement.announcementType == 1}">📢 通知</c:if>
-                                            <c:if test="${announcement.announcementType == 2}">🎉 活动</c:if>
-                                            <c:if test="${announcement.announcementType == 3}">📌 其他</c:if>
-                                        </span>
-                                    </div>
-                                    
-                                    <h3 class="announcement-title">
-                                        <a href="${pageContext.request.contextPath}/announcement/${announcement.id}">
-                                            ${announcement.title}
-                                        </a>
-                                    </h3>
-                                    
-                                    <div class="announcement-meta">
-                                        <span class="meta-item">
-                                            <i class="fas fa-user"></i> ${announcement.publisherName}
-                                        </span>
-                                        <span class="meta-item">
-                                            <i class="fas fa-calendar"></i> ${announcement.publishTime}
-                                        </span>
-                                        <span class="meta-item">
-                                            <i class="fas fa-eye"></i> ${announcement.viewCount} 浏览
-                                        </span>
-                                    </div>
-                                    
-                                    <div class="announcement-content">
-                                        ${announcement.content}
-                                    </div>
-                                    
-                                    <c:if test="${sessionScope.user.userType <= 2}">
-                                        <div class="announcement-footer">
-                                            <a href="${pageContext.request.contextPath}/admin/announcement/edit/${announcement.id}" class="btn btn-sm btn-edit">
-                                                <i class="fas fa-edit"></i> 编辑
-                                            </a>
-                                            <button class="btn btn-sm btn-delete" onclick="deleteAnnouncement(${announcement.id})">
-                                                <i class="fas fa-trash"></i> 删除
-                                            </button>
-                                            <c:if test="${announcement.isTop == 0}">
-                                                <button class="btn btn-sm btn-top" onclick="topAnnouncement(${announcement.id})">
-                                                    <i class="fas fa-arrow-up"></i> 置顶
-                                                </button>
-                                            </c:if>
-                                        </div>
-                                    </c:if>
-                                </div>
-                            </c:forEach>
-                        </c:otherwise>
-                    </c:choose>
+                    <div class="empty-state">
+                        <i class="fas fa-spinner"></i>
+                        <h3>加载中...</h3>
+                        <p>请稍候</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
     
     <script>
+        let currentAnnouncements = [];
+        
+        // 页面加载时获取公告数据
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAnnouncements();
+        });
+        
+        function loadAnnouncements() {
+            fetch('${pageContext.request.contextPath}/api/announcement/list')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.code === 200 && data.data) {
+                        currentAnnouncements = data.data;
+                        renderAnnouncements(currentAnnouncements);
+                    } else {
+                        showError('加载公告失败');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showError('加载公告失败：' + error.message);
+                });
+        }
+        
+        function renderAnnouncements(announcements) {
+            const container = document.getElementById('announcementsList');
+            
+            if (!announcements || announcements.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <h3>暂无公告</h3>
+                        <p>当前还没有公告内容，敬请期待</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const html = announcements.map(ann => `
+                <div class="announcement-card ${ann.isTop == 1 ? 'is-top' : ''}">
+                    <div class="announcement-header">
+                        <span class="announcement-type type-${ann.announcementType}">
+                            ${getTypeLabel(ann.announcementType)}
+                        </span>
+                    </div>
+                    
+                    <h3 class="announcement-title">
+                        <a href="${pageContext.request.contextPath}/announcement/\${ann.id}">
+                            \${ann.title}
+                        </a>
+                    </h3>
+                    
+                    <div class="announcement-meta">
+                        <span class="meta-item">
+                            <i class="fas fa-user"></i> \${ann.publisherName || '系统管理员'}
+                        </span>
+                        <span class="meta-item">
+                            <i class="fas fa-calendar"></i> \${formatDate(ann.publishTime)}
+                        </span>
+                        <span class="meta-item">
+                            <i class="fas fa-eye"></i> \${ann.viewCount || 0} 浏览
+                        </span>
+                    </div>
+                    
+                    <div class="announcement-content">
+                        \${ann.content ? ann.content.substring(0, 120) + '...' : ''}
+                    </div>
+                    
+                    <div class="announcement-footer">
+                        <a href="${pageContext.request.contextPath}/announcement/\${ann.id}" class="btn btn-sm" style="background: var(--primary); color: white;">
+                            <i class="fas fa-eye"></i> 查看详情
+                        </a>
+                    </div>
+                </div>
+            `).join('');
+            
+            container.innerHTML = html;
+        }
+        
+        function getTypeLabel(type) {
+            switch(type) {
+                case 1: return '📢 通知';
+                case 2: return '🎉 活动';
+                case 3: return '📌 其他';
+                default: return '📰 公告';
+            }
+        }
+        
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('zh-CN', { 
+                year: 'numeric', 
+                month: '2-digit', 
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+        
         function searchAnnouncements() {
-            const keyword = document.getElementById('searchKeyword').value;
+            const keyword = document.getElementById('searchKeyword').value.toLowerCase();
             const type = document.getElementById('typeFilter').value;
-            console.log('Search:', keyword, type);
+            
+            let filtered = currentAnnouncements;
+            
+            if (keyword) {
+                filtered = filtered.filter(ann => 
+                    ann.title.toLowerCase().includes(keyword) || 
+                    (ann.content && ann.content.toLowerCase().includes(keyword))
+                );
+            }
+            
+            if (type) {
+                filtered = filtered.filter(ann => ann.announcementType == type);
+            }
+            
+            renderAnnouncements(filtered);
         }
         
         function deleteAnnouncement(id) {
@@ -655,6 +714,10 @@
                         alert('退出失败');
                     });
             }
+        }
+        
+        function showError(message) {
+            alert(message);
         }
     </script>
 </body>

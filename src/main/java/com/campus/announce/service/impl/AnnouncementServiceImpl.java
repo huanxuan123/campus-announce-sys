@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -52,13 +53,74 @@ public class AnnouncementServiceImpl implements AnnouncementService {
 
     @Override
     @Transactional
+    public int createAnnouncementWithPermission(Announcement announcement, Integer userType, Long userDeptId) {
+        if (userType == 2) {
+            if (announcement.getScope() == 1) {
+                throw new RuntimeException("院系管理员不能发布全校公告");
+            }
+            announcement.setDeptId(userDeptId);
+        } else if (userType == 3 || userType == 4) {
+            throw new RuntimeException("师生不能发布公告");
+        }
+        
+        announcement.setPublishTime(new Date());
+        return announcementMapper.insert(announcement);
+    }
+
+    @Override
+    @Transactional
     public int updateAnnouncement(Announcement announcement) {
         return announcementMapper.update(announcement);
     }
 
     @Override
     @Transactional
+    public int updateAnnouncementWithPermission(Announcement announcement, Integer userType, Long userDeptId) {
+        Announcement existing = announcementMapper.selectById(announcement.getId());
+        if (existing == null) {
+            throw new RuntimeException("公告不存在");
+        }
+        
+        if (userType == 2) {
+            if (existing.getScope() == 1) {
+                throw new RuntimeException("院系管理员不能修改全校公告");
+            }
+            if (!existing.getDeptId().equals(userDeptId)) {
+                throw new RuntimeException("院系管理员只能修改本院系的公告");
+            }
+            announcement.setDeptId(userDeptId);
+        } else if (userType == 3 || userType == 4) {
+            throw new RuntimeException("师生不能修改公告");
+        }
+        
+        return announcementMapper.update(announcement);
+    }
+
+    @Override
+    @Transactional
     public int deleteAnnouncement(Long id) {
+        return announcementMapper.deleteById(id);
+    }
+
+    @Override
+    @Transactional
+    public int deleteAnnouncementWithPermission(Long id, Integer userType, Long userDeptId) {
+        Announcement announcement = announcementMapper.selectById(id);
+        if (announcement == null) {
+            throw new RuntimeException("公告不存在");
+        }
+        
+        if (userType == 2) {
+            if (announcement.getScope() == 1) {
+                throw new RuntimeException("院系管理员不能删除全校公告");
+            }
+            if (!announcement.getDeptId().equals(userDeptId)) {
+                throw new RuntimeException("院系管理员只能删除本院系的公告");
+            }
+        } else if (userType == 3 || userType == 4) {
+            throw new RuntimeException("师生不能删除公告");
+        }
+        
         return announcementMapper.deleteById(id);
     }
 

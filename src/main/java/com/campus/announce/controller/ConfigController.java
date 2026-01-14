@@ -1,10 +1,12 @@
 package com.campus.announce.controller;
 
 import com.campus.announce.common.Result;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.campus.announce.entity.User;
+import com.campus.announce.service.ConfigService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +15,9 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/config")
 public class ConfigController {
+
+    @Autowired
+    private ConfigService configService;
 
     @GetMapping("/announcementTypes")
     public Result<List<Map<String, Object>>> getAnnouncementTypes() {
@@ -123,5 +128,107 @@ public class ConfigController {
         configs.put("userStatuses", getUserStatuses().getData());
         configs.put("announcementStatuses", getAnnouncementStatuses().getData());
         return Result.success(configs);
+    }
+
+    @GetMapping("/system")
+    public Result<List<Map<String, Object>>> getSystemConfigs(HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return Result.error("未登录");
+        }
+        if (user.getUserType() != 1) {
+            return Result.error("只有超级管理员可以查看系统配置");
+        }
+        
+        try {
+            List<Map<String, Object>> configs = configService.getAllConfigs();
+            return Result.success(configs);
+        } catch (Exception e) {
+            return Result.error("查询失败：" + e.getMessage());
+        }
+    }
+
+    @GetMapping("/system/{configKey}")
+    public Result<String> getSystemConfig(@PathVariable String configKey, HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return Result.error("未登录");
+        }
+        if (user.getUserType() != 1) {
+            return Result.error("只有超级管理员可以查看系统配置");
+        }
+        
+        try {
+            String value = configService.getValueByKey(configKey);
+            return Result.success(value);
+        } catch (Exception e) {
+            return Result.error("查询失败：" + e.getMessage());
+        }
+    }
+
+    @PutMapping("/system/{configKey}")
+    public Result<String> updateSystemConfig(
+            @PathVariable String configKey,
+            @RequestBody Map<String, String> params,
+            HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return Result.error("未登录");
+        }
+        if (user.getUserType() != 1) {
+            return Result.error("只有超级管理员可以修改系统配置");
+        }
+        
+        try {
+            String configValue = params.get("configValue");
+            int result = configService.updateValue(configKey, configValue);
+            if (result > 0) {
+                return Result.success("更新成功");
+            } else {
+                return Result.error("更新失败");
+            }
+        } catch (Exception e) {
+            return Result.error("更新失败：" + e.getMessage());
+        }
+    }
+
+    @GetMapping("/announcementRetentionDays")
+    public Result<String> getAnnouncementRetentionDays() {
+        try {
+            String value = configService.getAnnouncementRetentionDays();
+            return Result.success(value);
+        } catch (Exception e) {
+            return Result.error("查询失败：" + e.getMessage());
+        }
+    }
+
+    @GetMapping("/maxTopAnnouncements")
+    public Result<String> getMaxTopAnnouncements() {
+        try {
+            String value = configService.getMaxTopAnnouncements();
+            return Result.success(value);
+        } catch (Exception e) {
+            return Result.error("查询失败：" + e.getMessage());
+        }
+    }
+
+    @GetMapping("/maxAttachmentSize")
+    public Result<String> getMaxAttachmentSize() {
+        try {
+            String value = configService.getMaxAttachmentSize();
+            return Result.success(value);
+        } catch (Exception e) {
+            return Result.error("查询失败：" + e.getMessage());
+        }
+    }
+
+    @GetMapping("/allowedFileTypes")
+    public Result<String> getAllowedFileTypes() {
+        try {
+            String value = configService.getAllowedFileTypes();
+            return Result.success(value);
+        } catch (Exception e) {
+            return Result.error("查询失败：" + e.getMessage());
+        }
     }
 }

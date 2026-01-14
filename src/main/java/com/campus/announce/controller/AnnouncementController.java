@@ -26,13 +26,27 @@ public class AnnouncementController {
             @RequestParam(required = false) Integer scope,
             @RequestParam(required = false) Long deptId,
             @RequestParam(required = false) String startTime,
-            @RequestParam(required = false) String endTime) {
+            @RequestParam(required = false) String endTime,
+            HttpSession session) {
         try {
+            User user = (User) session.getAttribute("user");
             Map<String, Object> params = new HashMap<>();
             params.put("title", title);
             params.put("announcementType", announcementType);
             params.put("scope", scope);
-            params.put("deptId", deptId);
+            
+            if (user != null) {
+                if (user.getUserType() == 2) {
+                    params.put("deptId", user.getDeptId());
+                } else {
+                    if (user.getUserType() == 3 || user.getUserType() == 4) {
+                        if (deptId != null && !deptId.equals(user.getDeptId())) {
+                            params.put("deptId", user.getDeptId());
+                        }
+                    }
+                }
+            }
+            
             params.put("startTime", startTime);
             params.put("endTime", endTime);
             
@@ -92,8 +106,11 @@ public class AnnouncementController {
             if (user == null) {
                 return Result.error("请先登录");
             }
+            if (user.getUserType() == 3 || user.getUserType() == 4) {
+                return Result.error("师生不能发布公告");
+            }
             announcement.setPublisherId(user.getId());
-            announcementService.createAnnouncement(announcement);
+            announcementService.createAnnouncementWithPermission(announcement, user.getUserType(), user.getDeptId());
             return Result.success("发布成功");
         } catch (Exception e) {
             return Result.error("发布失败：" + e.getMessage());
@@ -101,10 +118,17 @@ public class AnnouncementController {
     }
 
     @PutMapping("/{id}")
-    public Result<String> updateAnnouncement(@PathVariable Long id, @RequestBody Announcement announcement) {
+    public Result<String> updateAnnouncement(@PathVariable Long id, @RequestBody Announcement announcement, HttpSession session) {
         try {
+            User user = (User) session.getAttribute("user");
+            if (user == null) {
+                return Result.error("请先登录");
+            }
+            if (user.getUserType() == 3 || user.getUserType() == 4) {
+                return Result.error("师生不能修改公告");
+            }
             announcement.setId(id);
-            announcementService.updateAnnouncement(announcement);
+            announcementService.updateAnnouncementWithPermission(announcement, user.getUserType(), user.getDeptId());
             return Result.success("更新成功");
         } catch (Exception e) {
             return Result.error("更新失败：" + e.getMessage());
@@ -112,9 +136,16 @@ public class AnnouncementController {
     }
 
     @DeleteMapping("/{id}")
-    public Result<String> deleteAnnouncement(@PathVariable Long id) {
+    public Result<String> deleteAnnouncement(@PathVariable Long id, HttpSession session) {
         try {
-            announcementService.deleteAnnouncement(id);
+            User user = (User) session.getAttribute("user");
+            if (user == null) {
+                return Result.error("请先登录");
+            }
+            if (user.getUserType() == 3 || user.getUserType() == 4) {
+                return Result.error("师生不能删除公告");
+            }
+            announcementService.deleteAnnouncementWithPermission(id, user.getUserType(), user.getDeptId());
             return Result.success("删除成功");
         } catch (Exception e) {
             return Result.error("删除失败：" + e.getMessage());

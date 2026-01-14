@@ -13,19 +13,25 @@ public class LoginInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String requestURI = request.getRequestURI();
-        System.out.println("LoginInterceptor - Request URI: " + requestURI);
+        String contextPath = request.getContextPath();
+        String path = requestURI.substring(contextPath.length());
         
-        String uri = request.getRequestURI();
+        System.out.println("=== LoginInterceptor Debug ===");
+        System.out.println("Request URI: " + requestURI);
+        System.out.println("Context Path: " + contextPath);
+        System.out.println("Relative Path: " + path);
+        System.out.println("Starts with /static/: " + path.startsWith("/static/"));
+        System.out.println("Starts with /api/: " + path.startsWith("/api/"));
         
-        if (uri.endsWith("/login") || uri.endsWith("/login.jsp") ||
-            uri.endsWith("/register") || uri.endsWith("/register.jsp") ||
-            uri.endsWith("/forgot-password") || uri.endsWith("/forgot-password.jsp") ||
-            uri.endsWith("/reset-password") || uri.endsWith("/reset-password.jsp") ||
-            uri.endsWith("/profile") || uri.endsWith("/profile.jsp") ||
-            uri.endsWith("/user-list") || uri.endsWith("/user-list.jsp") ||
-            uri.endsWith("/index") || uri.endsWith("/index.jsp") ||
-            uri.startsWith("/static/") || uri.startsWith("/api/")) {
-            System.out.println("LoginInterceptor - Path excluded, allowing access");
+        if (path.endsWith("/login") || path.endsWith("/login.jsp") ||
+            path.endsWith("/register") || path.endsWith("/register.jsp") ||
+            path.endsWith("/forgot-password") || path.endsWith("/forgot-password.jsp") ||
+            path.endsWith("/reset-password") || path.endsWith("/reset-password.jsp") ||
+            path.endsWith("/profile") || path.endsWith("/profile.jsp") ||
+            path.endsWith("/user-list") || path.endsWith("/user-list.jsp") ||
+            path.endsWith("/index") || path.endsWith("/index.jsp") ||
+            path.startsWith("/static/") || path.startsWith("/api/")) {
+            System.out.println("✓ Path excluded, allowing access");
             return true;
         }
         
@@ -33,11 +39,12 @@ public class LoginInterceptor implements HandlerInterceptor {
         User user = (User) session.getAttribute("user");
         
         if (user == null) {
-            System.out.println("LoginInterceptor - User not logged in, redirecting to login");
-            response.sendRedirect("/login.jsp");
+            System.out.println("✗ User not logged in, redirecting to login");
+            response.sendRedirect(contextPath + "/login.jsp");
             return false;
         }
         
+        System.out.println("✓ User logged in, allowing access");
         return true;
     }
 

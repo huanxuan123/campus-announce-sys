@@ -15,7 +15,7 @@
                 <p>欢迎登录</p>
             </div>
             
-            <form id="loginForm" class="login-form">
+            <form id="loginForm" class="login-form" method="POST">
                 <div class="form-group">
                     <label for="username">用户名</label>
                     <input type="text" id="username" name="username" placeholder="请输入用户名" required>

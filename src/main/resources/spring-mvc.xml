@@ -10,6 +10,9 @@
        http://www.springframework.org/schema/mvc
        http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
+    <!-- 加载属性文件 -->
+    <context:property-placeholder location="classpath:jdbc.properties,classpath:upload.properties,classpath:mail.properties" ignore-unresolvable="true"/>
+
     <context:component-scan base-package="com.campus.announce.controller"/>
 
     <mvc:annotation-driven>

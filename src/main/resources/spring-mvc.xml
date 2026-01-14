@@ -10,6 +10,9 @@
        http://www.springframework.org/schema/mvc
        http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
+    <!-- 加载属性文件 -->
+    <context:property-placeholder location="classpath:jdbc.properties,classpath:upload.properties,classpath:mail.properties" ignore-unresolvable="true"/>
+
     <context:component-scan base-package="com.campus.announce.controller"/>
 
     <mvc:annotation-driven>
@@ -32,7 +35,8 @@
         </mvc:message-converters>
     </mvc:annotation-driven>
 
-    <mvc:default-servlet-handler/>
+    <mvc:resources mapping="/static/**" location="/static/"/>
+    <mvc:resources mapping="/uploads/**" location="/uploads/"/>
 
     <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
         <property name="maxUploadSize" value="10485760"/>
@@ -42,14 +46,29 @@
     <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
         <property name="prefix" value="/WEB-INF/views/"/>
         <property name="suffix" value=".jsp"/>
+        <property name="order" value="1"/>
     </bean>
+
+    <!-- 直接映射静态JSP页面 -->
+    <mvc:view-controller path="/login.jsp" view-name="forward:/login.jsp"/>
+    <mvc:view-controller path="/register.jsp" view-name="forward:/register.jsp"/>
+    <mvc:view-controller path="/forgot-password.jsp" view-name="forward:/forgot-password.jsp"/>
+    <mvc:view-controller path="/reset-password.jsp" view-name="forward:/reset-password.jsp"/>
+    <mvc:view-controller path="/announcement-list.jsp" view-name="forward:/announcement-list.jsp"/>
+    <mvc:view-controller path="/index.jsp" view-name="forward:/index.jsp"/>
+    <mvc:view-controller path="/profile.jsp" view-name="forward:/profile.jsp"/>
+    <mvc:view-controller path="/user-list.jsp" view-name="forward:/user-list.jsp"/>
+    <mvc:view-controller path="/diagnostics.jsp" view-name="forward:/diagnostics.jsp"/>
 
     <mvc:interceptors>
         <mvc:interceptor>
             <mvc:mapping path="/**"/>
-            <mvc:exclude-mapping path="/login"/>
-            <mvc:exclude-mapping path="/register"/>
+            <!-- 排除静态资源、API接口和公开页面 -->
             <mvc:exclude-mapping path="/static/**"/>
+            <mvc:exclude-mapping path="/uploads/**"/>
+            <mvc:exclude-mapping path="/api/**"/>
+            <mvc:exclude-mapping path="/*.jsp"/>
+            <mvc:exclude-mapping path="/favicon.ico"/>
             <bean class="com.campus.announce.interceptor.LoginInterceptor"/>
         </mvc:interceptor>
     </mvc:interceptors>

@@ -27,7 +27,13 @@ public interface UserService {
 
     int updatePassword(Long id, String oldPassword, String newPassword);
 
+    int updatePasswordByAdmin(Long id, String newPassword);
+
     int updateUserStatus(Long id, Integer status);
 
     List<User> getAllUsers();
+
+    String sendPasswordResetEmail(String email);
+
+    boolean resetPassword(String token, String newPassword);
 }

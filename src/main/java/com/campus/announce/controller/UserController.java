@@ -92,6 +92,18 @@ public class UserController {
         }
     }
 
+    @PutMapping("/{id}/admin-password")
+    public Result<String> updatePasswordByAdmin(
+            @PathVariable Long id,
+            @RequestParam String newPassword) {
+        try {
+            userService.updatePasswordByAdmin(id, newPassword);
+            return Result.success("密码修改成功");
+        } catch (Exception e) {
+            return Result.error("密码修改失败：" + e.getMessage());
+        }
+    }
+
     @PutMapping("/{id}/status")
     public Result<String> updateUserStatus(
             @PathVariable Long id,

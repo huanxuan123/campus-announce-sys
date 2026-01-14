@@ -16,6 +16,8 @@ public interface AnnouncementService {
     
     Announcement getAnnouncementById(Long id);
     
+    List<Announcement> getAnnouncementList(Map<String, Object> params);
+    
     List<Announcement> getAnnouncementsByCondition(Map<String, Object> params);
     
     List<Announcement> getAnnouncementsByScopeAndDept(Integer scope, Long deptId);
@@ -31,4 +33,6 @@ public interface AnnouncementService {
     int deleteAttachment(Long id);
     
     List<Attachment> getAttachmentsByAnnouncementId(Long announcementId);
+    
+    void markAsRead(Long announcementId, Long userId);
 }

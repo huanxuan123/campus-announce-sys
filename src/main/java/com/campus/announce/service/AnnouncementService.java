@@ -17,9 +17,15 @@ public interface AnnouncementService {
 
     int createAnnouncement(Announcement announcement);
 
+    int createAnnouncementWithPermission(Announcement announcement, Integer userType, Long userDeptId);
+
     int updateAnnouncement(Announcement announcement);
 
+    int updateAnnouncementWithPermission(Announcement announcement, Integer userType, Long userDeptId);
+
     int deleteAnnouncement(Long id);
+
+    int deleteAnnouncementWithPermission(Long id, Integer userType, Long userDeptId);
 
     int setTopStatus(Long id, Integer isTop, Integer topOrder);
 

@@ -40,8 +40,9 @@
     </bean>
 
     <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-        <property name="prefix" value="/"/>
-        <property name="suffix" value=".jsp"/>
+        <property name="prefix" value=""/>
+        <property name="suffix" value=""/>
+        <property name="order" value="1"/>
     </bean>
 
     <mvc:interceptors>

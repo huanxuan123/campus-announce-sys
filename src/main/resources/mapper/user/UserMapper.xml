@@ -51,6 +51,7 @@
             <if test="email != null">email = #{email},</if>
             <if test="phone != null">phone = #{phone},</if>
             <if test="status != null">status = #{status},</if>
+            <if test="password != null">password = #{password},</if>
         </set>
         WHERE id = #{id}
     </update>

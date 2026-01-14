@@ -190,6 +190,7 @@ function showAddModal() {
     document.getElementById('modalTitle').textContent = '添加用户';
     document.getElementById('userForm').reset();
     document.getElementById('userId').value = '';
+    document.getElementById('password').value = '';
     document.getElementById('userModal').classList.add('show');
 }
 
@@ -230,9 +231,20 @@ function saveUser() {
     const email = document.getElementById('email').value.trim();
     const phone = document.getElementById('phone').value.trim();
     const status = document.getElementById('status').value;
+    const password = document.getElementById('password').value;
     
     if (!username || !realName || !userType) {
         showMessage('请填写必填项', 'error');
+        return;
+    }
+    
+    if (!userId && !password) {
+        showMessage('请输入密码', 'error');
+        return;
+    }
+    
+    if (password && password.length < 6) {
+        showMessage('密码长度不能少于6位', 'error');
         return;
     }
     
@@ -246,6 +258,14 @@ function saveUser() {
         phone: phone || null,
         status: parseInt(status)
     };
+    
+    if (!userId) {
+        userData.password = password;
+    }
+    
+    if (userId) {
+        userData.password = password;
+    }
     
     const url = userId ? `/api/user/${userId}` : '/api/user';
     const method = userId ? 'PUT' : 'POST';
@@ -306,6 +326,14 @@ function showPasswordModal(id) {
     
     document.getElementById('passwordUserId').value = id;
     document.getElementById('passwordForm').reset();
+    
+    const oldPasswordGroup = document.getElementById('oldPasswordGroup');
+    if (currentUser.userType === 1) {
+        oldPasswordGroup.style.display = 'none';
+    } else {
+        oldPasswordGroup.style.display = 'flex';
+    }
+    
     document.getElementById('passwordModal').classList.add('show');
 }
 
@@ -319,22 +347,50 @@ function savePassword() {
     const newPassword = document.getElementById('newPassword').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
     
-    if (!oldPassword || !newPassword || !confirmPassword) {
-        showMessage('请填写所有密码字段', 'error');
-        return;
+    if (currentUser.userType !== 1) {
+        if (!oldPassword || !newPassword || !confirmPassword) {
+            showMessage('请填写所有密码字段', 'error');
+            return;
+        }
+        
+        if (newPassword !== confirmPassword) {
+            showMessage('两次输入的新密码不一致', 'error');
+            return;
+        }
+        
+        if (newPassword.length < 6) {
+            showMessage('新密码长度不能少于6位', 'error');
+            return;
+        }
+    } else {
+        if (!newPassword || !confirmPassword) {
+            showMessage('请填写新密码', 'error');
+            return;
+        }
+        
+        if (newPassword !== confirmPassword) {
+            showMessage('两次输入的新密码不一致', 'error');
+            return;
+        }
+        
+        if (newPassword.length < 6) {
+            showMessage('新密码长度不能少于6位', 'error');
+            return;
+        }
     }
     
-    if (newPassword !== confirmPassword) {
-        showMessage('两次输入的新密码不一致', 'error');
-        return;
+    let url;
+    let params;
+    
+    if (currentUser.userType === 1) {
+        url = `/api/user/${userId}/admin-password`;
+        params = `newPassword=${newPassword}`;
+    } else {
+        url = `/api/user/${userId}/password`;
+        params = `oldPassword=${oldPassword}&newPassword=${newPassword}`;
     }
     
-    if (newPassword.length < 6) {
-        showMessage('新密码长度不能少于6位', 'error');
-        return;
-    }
-    
-    fetch(`/api/user/${userId}/password?oldPassword=${oldPassword}&newPassword=${newPassword}`, {
+    fetch(`${url}?${params}`, {
         method: 'PUT'
     })
     .then(response => response.json())

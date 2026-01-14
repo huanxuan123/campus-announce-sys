@@ -19,6 +19,7 @@
     <div class="container">
         <div class="sidebar">
             <a href="${pageContext.request.contextPath}/index.jsp" class="nav-item">首页</a>
+            <a href="${pageContext.request.contextPath}/profile.jsp" class="nav-item">个人信息</a>
             <a href="${pageContext.request.contextPath}/user-list.jsp" class="nav-item active">用户管理</a>
             <a href="#" class="nav-item">公告管理</a>
             <a href="#" class="nav-item">统计分析</a>
@@ -132,6 +133,11 @@
                         <option value="0">禁用</option>
                     </select>
                 </div>
+                
+                <div class="form-group">
+                    <label for="password">密码 *</label>
+                    <input type="password" id="password" name="password" placeholder="请输入密码（至少6位）" required>
+                </div>
             </form>
             <div class="modal-footer">
                 <button class="btn-cancel" onclick="closeModal()">取消</button>
@@ -149,9 +155,9 @@
             <form id="passwordForm" class="modal-body">
                 <input type="hidden" id="passwordUserId" name="id">
                 
-                <div class="form-group">
+                <div class="form-group" id="oldPasswordGroup" style="display: none;">
                     <label for="oldPassword">原密码 *</label>
-                    <input type="password" id="oldPassword" name="oldPassword" required>
+                    <input type="password" id="oldPassword" name="oldPassword">
                 </div>
                 
                 <div class="form-group">

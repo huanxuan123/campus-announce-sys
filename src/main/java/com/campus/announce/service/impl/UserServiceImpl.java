@@ -98,6 +98,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    public int updatePasswordByAdmin(Long id, String newPassword) {
+        User user = userMapper.selectById(id);
+        if (user == null) {
+            throw new RuntimeException("用户不存在");
+        }
+        return userMapper.updatePassword(id, newPassword);
+    }
+
+    @Override
+    @Transactional
     public int updateUserStatus(Long id, Integer status) {
         return userMapper.updateStatus(id, status);
     }

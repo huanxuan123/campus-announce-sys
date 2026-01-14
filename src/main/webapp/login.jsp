@@ -30,6 +30,10 @@
                     <button type="submit" class="btn-login">登录</button>
                     <a href="${pageContext.request.contextPath}/register.jsp" class="btn-register">注册账号</a>
                 </div>
+                
+                <div class="form-footer">
+                    <a href="${pageContext.request.contextPath}/forgot-password.jsp">忘记密码？</a>
+                </div>
             </form>
             
             <div id="message" class="message"></div>

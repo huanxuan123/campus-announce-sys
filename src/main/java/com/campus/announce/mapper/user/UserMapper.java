@@ -13,6 +13,8 @@ public interface UserMapper {
     
     User selectByStudentNo(String studentNo);
     
+    User selectByEmail(String email);
+    
     List<User> selectByDeptId(Long deptId);
     
     List<User> selectAll();

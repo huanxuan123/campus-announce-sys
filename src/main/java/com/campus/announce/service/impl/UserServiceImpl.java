@@ -1,20 +1,32 @@
 package com.campus.announce.service.impl;
 
+import com.campus.announce.entity.PasswordResetToken;
 import com.campus.announce.entity.User;
+import com.campus.announce.mapper.user.PasswordResetTokenMapper;
 import com.campus.announce.mapper.user.UserMapper;
+import com.campus.announce.service.EmailService;
 import com.campus.announce.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.mail.MessagingException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private PasswordResetTokenMapper passwordResetTokenMapper;
+
+    @Autowired
+    private EmailService emailService;
 
     @Override
     public User login(String username, String password) {
@@ -115,5 +127,57 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> getAllUsers() {
         return userMapper.selectAll();
+    }
+
+    @Override
+    @Transactional
+    public String sendPasswordResetEmail(String email) {
+        User user = userMapper.selectByEmail(email);
+        if (user == null) {
+            throw new RuntimeException("该邮箱未注册");
+        }
+        if (user.getStatus() == 0) {
+            throw new RuntimeException("该账号已被禁用");
+        }
+
+        passwordResetTokenMapper.deleteByUserId(user.getId());
+
+        String token = UUID.randomUUID().toString();
+        Date expiryDate = new Date(System.currentTimeMillis() + 30 * 60 * 1000);
+
+        PasswordResetToken resetToken = new PasswordResetToken();
+        resetToken.setUserId(user.getId());
+        resetToken.setToken(token);
+        resetToken.setExpiryDate(expiryDate);
+        resetToken.setCreateTime(new Date());
+
+        passwordResetTokenMapper.insert(resetToken);
+
+        try {
+            emailService.sendPasswordResetEmail(user.getEmail(), user.getUsername(), token);
+        } catch (MessagingException e) {
+            throw new RuntimeException("发送邮件失败：" + e.getMessage());
+        }
+
+        return user.getEmail();
+    }
+
+    @Override
+    @Transactional
+    public boolean resetPassword(String token, String newPassword) {
+        PasswordResetToken resetToken = passwordResetTokenMapper.selectByToken(token);
+        if (resetToken == null) {
+            throw new RuntimeException("重置令牌无效");
+        }
+
+        if (resetToken.getExpiryDate().before(new Date())) {
+            passwordResetTokenMapper.deleteByToken(token);
+            throw new RuntimeException("重置令牌已过期");
+        }
+
+        int result = userMapper.updatePassword(resetToken.getUserId(), newPassword);
+        passwordResetTokenMapper.deleteByToken(token);
+
+        return result > 0;
     }
 }

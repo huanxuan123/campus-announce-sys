@@ -40,20 +40,13 @@
     </bean>
 
     <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-        <property name="prefix" value="/WEB-INF/views/"/>
+        <property name="prefix" value="/"/>
         <property name="suffix" value=".jsp"/>
     </bean>
 
     <mvc:interceptors>
         <mvc:interceptor>
             <mvc:mapping path="/**"/>
-            <mvc:exclude-mapping path="/api/**"/>
-            <mvc:exclude-mapping path="/login.jsp"/>
-            <mvc:exclude-mapping path="/register.jsp"/>
-            <mvc:exclude-mapping path="/profile.jsp"/>
-            <mvc:exclude-mapping path="/user-list.jsp"/>
-            <mvc:exclude-mapping path="/index.jsp"/>
-            <mvc:exclude-mapping path="/static/**"/>
             <bean class="com.campus.announce.interceptor.LoginInterceptor"/>
         </mvc:interceptor>
     </mvc:interceptors>

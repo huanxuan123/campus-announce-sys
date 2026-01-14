@@ -32,4 +32,8 @@ public interface UserService {
     int updateUserStatus(Long id, Integer status);
 
     List<User> getAllUsers();
+
+    String sendPasswordResetEmail(String email);
+
+    boolean resetPassword(String token, String newPassword);
 }

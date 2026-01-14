@@ -32,26 +32,50 @@ public class UserServiceImpl implements UserService {
     public User login(String username, String password) {
         User user = userMapper.selectByUsername(username);
         if (user == null) {
+            System.out.println("登录失败：用户不存在 - " + username);
             return null;
         }
-        if (password.equals(user.getPassword())) {
+        
+        String dbPassword = user.getPassword();
+        String inputPassword = password;
+        
+        System.out.println("登录调试 - 用户名: " + username);
+        System.out.println("登录调试 - 数据库密码: [" + dbPassword + "] 长度: " + dbPassword.length());
+        System.out.println("登录调试 - 输入密码: [" + inputPassword + "] 长度: " + inputPassword.length());
+        System.out.println("登录调试 - 密码是否相等: " + inputPassword.equals(dbPassword));
+        System.out.println("登录调试 - trim后是否相等: " + inputPassword.trim().equals(dbPassword.trim()));
+        
+        if (inputPassword.equals(dbPassword)) {
+            System.out.println("登录成功: " + username);
             return user;
         }
+        
+        if (inputPassword.trim().equals(dbPassword.trim())) {
+            System.out.println("登录成功（trim后）: " + username);
+            return user;
+        }
+        
+        System.out.println("登录失败：密码不匹配 - " + username);
         return null;
     }
 
     @Override
     @Transactional
     public User register(User user) {
-        User existUser = userMapper.selectByUsername(user.getUsername());
+        User existUser = userMapper.selectByUsername(user.getUsername().trim());
         if (existUser != null) {
             throw new RuntimeException("用户名已存在");
         }
         if (user.getStudentNo() != null) {
-            User existStudent = userMapper.selectByStudentNo(user.getStudentNo());
+            User existStudent = userMapper.selectByStudentNo(user.getStudentNo().trim());
             if (existStudent != null) {
                 throw new RuntimeException("学号/工号已存在");
             }
+        }
+        user.setUsername(user.getUsername().trim());
+        user.setPassword(user.getPassword().trim());
+        if (user.getStudentNo() != null) {
+            user.setStudentNo(user.getStudentNo().trim());
         }
         userMapper.insert(user);
         return user;
@@ -102,10 +126,10 @@ public class UserServiceImpl implements UserService {
         if (user == null) {
             throw new RuntimeException("用户不存在");
         }
-        if (!oldPassword.equals(user.getPassword())) {
+        if (!oldPassword.trim().equals(user.getPassword().trim())) {
             throw new RuntimeException("原密码错误");
         }
-        return userMapper.updatePassword(id, newPassword);
+        return userMapper.updatePassword(id, newPassword.trim());
     }
 
     @Override
@@ -115,7 +139,7 @@ public class UserServiceImpl implements UserService {
         if (user == null) {
             throw new RuntimeException("用户不存在");
         }
-        return userMapper.updatePassword(id, newPassword);
+        return userMapper.updatePassword(id, newPassword.trim());
     }
 
     @Override

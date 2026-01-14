@@ -117,7 +117,7 @@
             <div class="quick-links">
                 <a href="profile.jsp" class="quick-link">个人信息</a>
                 <a href="user-list.jsp" class="quick-link">用户管理</a>
-                <a href="#" class="quick-link">公告管理</a>
+                <a href="announcement-list.jsp" class="quick-link">公告管理</a>
                 <a href="#" class="quick-link">统计分析</a>
             </div>
         </div>

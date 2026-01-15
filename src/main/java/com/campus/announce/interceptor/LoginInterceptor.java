@@ -67,7 +67,8 @@ public class LoginInterceptor implements HandlerInterceptor {
             path.endsWith("/register") || path.endsWith("/register.jsp") ||
             path.endsWith("/forgot-password") || path.endsWith("/forgot-password.jsp") ||
             path.endsWith("/reset-password") || path.endsWith("/reset-password.jsp") ||
-            path.endsWith("/announcement-list.jsp") ||
+            path.endsWith("/announcement-list") || path.endsWith("/announcement-list.jsp") ||
+            path.endsWith("/announcement") || path.endsWith("/announcement-detail.jsp") ||
             path.endsWith("/index") || path.endsWith("/index.jsp") ||
             path.endsWith("/diagnostics.jsp") ||
             path.equals("/") || path.isEmpty() ||

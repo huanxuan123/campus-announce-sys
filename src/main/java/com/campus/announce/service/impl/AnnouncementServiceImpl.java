@@ -4,6 +4,8 @@ import com.campus.announce.entity.Announcement;
 import com.campus.announce.mapper.announcement.AnnouncementMapper;
 import com.campus.announce.mapper.query.AnnouncementReadMapper;
 import com.campus.announce.service.AnnouncementService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +16,8 @@ import java.util.Map;
 
 @Service
 public class AnnouncementServiceImpl implements AnnouncementService {
+
+    private static final Logger logger = LoggerFactory.getLogger(AnnouncementServiceImpl.class);
 
     @Autowired
     private AnnouncementMapper announcementMapper;
@@ -70,7 +74,10 @@ public class AnnouncementServiceImpl implements AnnouncementService {
     @Override
     @Transactional
     public int updateAnnouncement(Announcement announcement) {
-        return announcementMapper.update(announcement);
+        logger.info("开始更新公告 - ID: {}, 数据: {}", announcement.getId(), announcement);
+        int result = announcementMapper.update(announcement);
+        logger.info("更新公告完成 - 影响行数: {}", result);
+        return result;
     }
 
     @Override

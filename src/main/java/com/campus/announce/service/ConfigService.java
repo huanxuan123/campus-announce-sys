@@ -12,14 +12,13 @@ public interface ConfigService {
     List<Map<String, Object>> getAllConfigs();
 
     int updateValue(String configKey, String configValue);
-
+    
+    int updateConfig(String configKey, String configValue);
+    
     int insertConfig(String configKey, String configValue, String configDesc);
-
+    
     String getAnnouncementRetentionDays();
-
     String getMaxTopAnnouncements();
-
     String getMaxAttachmentSize();
-
     String getAllowedFileTypes();
 }

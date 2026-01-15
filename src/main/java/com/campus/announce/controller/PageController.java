@@ -63,6 +63,12 @@ public class PageController {
         return "user-list";
     }
     
+    @GetMapping({"/announcement", "**/announcement"})
+    public String announcement() {
+        logger.debug("访问公告详情页面");
+        return "announcement-detail";
+    }
+    
     @GetMapping("/favicon.ico")
     public void favicon(HttpServletResponse response) throws IOException {
         logger.debug("访问favicon.ico");

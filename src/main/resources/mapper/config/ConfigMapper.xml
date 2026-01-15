@@ -19,6 +19,11 @@
         UPDATE sys_config SET config_value = #{configValue}, update_time = NOW()
         WHERE config_key = #{configKey}
     </update>
+    
+    <update id="updateConfig">
+        UPDATE sys_config SET config_value = #{configValue}, update_time = NOW()
+        WHERE config_key = #{configKey}
+    </update>
 
     <insert id="insertConfig">
         INSERT INTO sys_config (config_key, config_value, config_desc)

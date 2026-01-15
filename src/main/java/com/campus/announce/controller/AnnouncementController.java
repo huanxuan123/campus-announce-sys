@@ -152,15 +152,20 @@ public class AnnouncementController {
         try {
             User user = (User) session.getAttribute("user");
             if (user == null) {
+                logger.warn("未登录用户尝试修改公告 - ID: {}", id);
                 return Result.error("请先登录");
             }
             if (user.getUserType() == 3 || user.getUserType() == 4) {
+                logger.warn("用户 {} (类型: {}) 尝试修改公告 {}，被拒绝", user.getUsername(), user.getUserType(), id);
                 return Result.error("师生不能修改公告");
             }
             announcement.setId(id);
-            announcementService.updateAnnouncementWithPermission(announcement, user.getUserType(), user.getDeptId());
+            logger.info("用户 {} 修改公告 {} - 数据: {}", user.getUsername(), id, announcement);
+            int result = announcementService.updateAnnouncementWithPermission(announcement, user.getUserType(), user.getDeptId());
+            logger.info("公告修改结果 - 影响行数: {}", result);
             return Result.success("更新成功");
         } catch (Exception e) {
+            logger.error("更新公告失败 - ID: {}", id, e);
             return Result.error("更新失败：" + e.getMessage());
         }
     }

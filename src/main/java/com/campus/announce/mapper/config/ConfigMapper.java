@@ -11,9 +11,11 @@ public interface ConfigMapper {
 
     Map<String, Object> getConfigByKey(@Param("configKey") String configKey);
 
-    List<Map<String, Object>> getAllConfigs();
+List<Map<String, Object>> getAllConfigs();
 
     int updateValue(@Param("configKey") String configKey, @Param("configValue") String configValue);
-
+    
+    int updateConfig(@Param("configKey") String configKey, @Param("configValue") String configValue);
+    
     int insertConfig(@Param("configKey") String configKey, @Param("configValue") String configValue, @Param("configDesc") String configDesc);
 }

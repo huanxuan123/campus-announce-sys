@@ -17,6 +17,14 @@ const AnnouncementList = {
     // 当前筛选类型
     currentFilterType: '',
     
+    // 系统配置
+    systemConfigs: {
+        retentionDays: '',
+        maxTopAnnouncements: '',
+        maxAttachmentSize: '',
+        allowedFileTypes: ''
+    },
+    
     /**
      * 初始化
      */
@@ -36,15 +44,32 @@ const AnnouncementList = {
                 if (data.data) {
                     this.currentUser = data.data;
                     this.updateUserDisplay();
+                    this.updateSystemSettingsButton();
                 } else {
                     this.currentUser = null;
                     document.getElementById('userName').textContent = '未登录';
+                    this.updateSystemSettingsButton();
                 }
             })
             .catch(error => {
                 Logger.error('加载用户信息失败', error);
                 document.getElementById('userName').textContent = '未登录';
+                this.updateSystemSettingsButton();
             });
+    },
+    
+    /**
+     * 更新系统设置按钮显示状态
+     */
+    updateSystemSettingsButton: function() {
+        const settingsBtn = document.querySelector('.btn-system-settings');
+        if (settingsBtn) {
+            if (this.currentUser && this.currentUser.userType === 1) {
+                settingsBtn.style.display = 'flex';
+            } else {
+                settingsBtn.style.display = 'none';
+            }
+        }
     },
     
     /**
@@ -137,8 +162,14 @@ const AnnouncementList = {
         const viewCount = ann.viewCount || 0;
         const publishTime = Utils.formatDate(ann.publishTime);
         const announcementId = ann.id;
-        // 从API基础URL中提取contextPath
         const contextPath = AppConfig.apiBaseUrl.replace('/api', '') || '';
+        
+        let adminButton = '';
+        if (this.currentUser && this.currentUser.userType === 1) {
+            adminButton = '<a href="' + contextPath + '/announcement-admin-detail.jsp?id=' + announcementId + '" class="btn btn-sm" style="background: #8b5cf6; color: white;">' +
+                '<i class="fas fa-cog"></i> 管理员详情' +
+                '</a>';
+        }
         
         return '<div class="announcement-card' + (isTop ? ' is-top' : '') + '">' +
             '<div class="announcement-header">' +
@@ -147,7 +178,7 @@ const AnnouncementList = {
             '</span>' +
             '</div>' +
             '<h3 class="announcement-title">' +
-            '<a href="' + contextPath + '/announcement/' + announcementId + '">' +
+            '<a href="' + contextPath + '/announcement-detail.jsp?id=' + announcementId + '">' +
             title +
             '</a>' +
             '</h3>' +
@@ -166,9 +197,10 @@ const AnnouncementList = {
             content +
             '</div>' +
             '<div class="announcement-footer">' +
-            '<a href="' + contextPath + '/announcement/' + announcementId + '" class="btn btn-sm" style="background: var(--primary); color: white;">' +
+            '<a href="' + contextPath + '/announcement-detail.jsp?id=' + announcementId + '" class="btn btn-sm" style="background: var(--primary); color: white;">' +
             '<i class="fas fa-eye"></i> 查看详情' +
             '</a>' +
+            adminButton +
             '</div>' +
             '</div>';
     },
@@ -346,6 +378,111 @@ const AnnouncementList = {
                     ErrorHandler.showError('退出失败：' + error.message);
                 });
         }
+    },
+    
+    /**
+     * 显示系统参数设置模态框
+     */
+    showSystemSettings: function() {
+        Logger.log('显示系统参数设置');
+        
+        if (this.currentUser && this.currentUser.userType !== 1) {
+            ErrorHandler.showError('只有超级管理员可以修改系统参数');
+            return;
+        }
+        
+        this.loadSystemConfigs();
+        
+        const modal = document.getElementById('systemSettingsModal');
+        if (modal) {
+            modal.classList.add('show');
+        }
+    },
+    
+    /**
+     * 关闭系统参数设置模态框
+     */
+    closeSystemSettings: function() {
+        Logger.log('关闭系统参数设置');
+        const modal = document.getElementById('systemSettingsModal');
+        if (modal) {
+            modal.classList.remove('show');
+        }
+    },
+    
+    /**
+     * 加载系统参数
+     */
+    loadSystemConfigs: function() {
+        Logger.log('加载系统参数');
+        
+        Promise.all([
+            ApiClient.get('/config/announcementRetentionDays'),
+            ApiClient.get('/config/maxTopAnnouncements'),
+            ApiClient.get('/config/maxAttachmentSize'),
+            ApiClient.get('/config/allowedFileTypes')
+        ])
+        .then(([retentionDays, maxTop, maxSize, fileTypes]) => {
+            if (retentionDays.data) {
+                document.getElementById('retentionDays').value = retentionDays.data;
+            }
+            if (maxTop.data) {
+                document.getElementById('maxTopAnnouncements').value = maxTop.data;
+            }
+            if (maxSize.data) {
+                document.getElementById('maxAttachmentSize').value = maxSize.data;
+            }
+            if (fileTypes.data) {
+                document.getElementById('allowedFileTypes').value = fileTypes.data;
+            }
+            Logger.log('系统参数加载完成', {
+                retentionDays: retentionDays.data,
+                maxTop: maxTop.data,
+                maxSize: maxSize.data,
+                fileTypes: fileTypes.data
+            });
+        })
+        .catch(error => {
+            Logger.error('加载系统参数失败', error);
+            ErrorHandler.showError('加载系统参数失败：' + error.message);
+        });
+    },
+    
+    /**
+     * 保存系统参数
+     */
+    saveSystemSettings: function() {
+        Logger.log('保存系统参数');
+        
+        if (this.currentUser && this.currentUser.userType !== 1) {
+            ErrorHandler.showError('只有超级管理员可以修改系统参数');
+            return;
+        }
+        
+        const retentionDays = document.getElementById('retentionDays').value.trim();
+        const maxTop = document.getElementById('maxTopAnnouncements').value.trim();
+        const maxSize = document.getElementById('maxAttachmentSize').value.trim();
+        const fileTypes = document.getElementById('allowedFileTypes').value.trim();
+        
+        const params = {
+            configValue: retentionDays
+        };
+        
+        Promise.all([
+            ApiClient.put('/config/system/announcementRetentionDays', params),
+            ApiClient.put('/config/system/maxTopAnnouncements', { configValue: maxTop }),
+            ApiClient.put('/config/system/maxAttachmentSize', { configValue: maxSize }),
+            ApiClient.put('/config/system/allowedFileTypes', { configValue: fileTypes })
+        ])
+        .then(() => {
+            ErrorHandler.showSuccess('系统参数保存成功');
+            this.closeSystemSettings();
+            this.loadAnnouncements();
+        })
+        .catch(error => {
+            Logger.error('保存系统参数失败', error);
+            ErrorHandler.showError('保存系统参数失败：' + error.message);
+        });
     }
 };
 

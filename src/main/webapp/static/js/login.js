@@ -10,6 +10,20 @@ const LoginPage = {
      */
     init: function() {
         Logger.log('登录页面初始化');
+        
+        // 重置登录按钮状态
+        const loginBtn = document.querySelector('.btn-login');
+        if (loginBtn) {
+            loginBtn.disabled = false;
+            loginBtn.textContent = '登录';
+        }
+        
+        // 清除之前的消息
+        const messageContainer = document.getElementById('message');
+        if (messageContainer) {
+            messageContainer.innerHTML = '';
+        }
+        
         this.bindEvents();
     },
     
@@ -32,6 +46,7 @@ const LoginPage = {
     handleLogin: function() {
         const username = document.getElementById('username').value.trim();
         const password = document.getElementById('password').value;
+        const loginBtn = document.querySelector('.btn-login');
         
         if (!username || !password) {
             ErrorHandler.showError('请输入用户名和密码', 'message');
@@ -45,6 +60,12 @@ const LoginPage = {
         
         Logger.log('尝试登录', { username });
         
+        // 禁用登录按钮，防止重复提交
+        if (loginBtn) {
+            loginBtn.disabled = true;
+            loginBtn.textContent = '登录中...';
+        }
+        
         ApiClient.post('/login', loginData)
             .then(data => {
                 Logger.log('登录成功', { username });
@@ -56,7 +77,14 @@ const LoginPage = {
             })
             .catch(error => {
                 Logger.error('登录失败', error);
-                ErrorHandler.showError(error.message || '登录失败', 'message');
+                const errorMsg = error.message || '登录失败';
+                ErrorHandler.showError(errorMsg, 'message');
+                
+                // 恢复登录按钮
+                if (loginBtn) {
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = '登录';
+                }
             });
     }
 };
@@ -75,4 +103,15 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 初始化登录页面
     LoginPage.init();
+});
+
+// 监听页面显示事件（包括从缓存恢复、前进/后退）
+window.addEventListener('pageshow', function(event) {
+    Logger.log('页面显示事件触发', { persisted: event.persisted });
+    
+    // 如果是从缓存恢复的页面，重新初始化
+    if (event.persisted) {
+        Logger.log('从缓存恢复页面，重新初始化');
+        LoginPage.init();
+    }
 });

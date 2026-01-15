@@ -21,7 +21,7 @@
             <a href="${pageContext.request.contextPath}/index.jsp" class="nav-item">首页</a>
             <a href="${pageContext.request.contextPath}/profile.jsp" class="nav-item active">个人信息</a>
             <a href="${pageContext.request.contextPath}/user-list.jsp" class="nav-item">用户管理</a>
-            <a href="#" class="nav-item">公告管理</a>
+            <a href="${pageContext.request.contextPath}/announcement-list.jsp" class="nav-item">公告管理</a>
             <a href="#" class="nav-item">统计分析</a>
         </div>
         

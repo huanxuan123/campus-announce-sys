@@ -21,11 +21,12 @@ const ProfilePage = {
      * 加载当前用户信息
      */
     loadCurrentUser: function() {
-        ApiClient.get('/currentUser')
+        ApiClient.get('/currentUser?t=' + Date.now())
             .then(data => {
                 if (data.data) {
                     this.currentUser = data.data;
                     document.getElementById('userName').textContent = '欢迎，' + data.data.realName;
+                    Logger.log('用户信息已更新', data.data);
                     this.loadProfileData();
                 } else {
                     Logger.warn('未登录，跳转到登录页');
@@ -37,6 +38,9 @@ const ProfilePage = {
                 Logger.error('获取用户信息失败', error);
                 const basePath = AppConfig.apiBaseUrl.replace('/api', '') || '';
                 window.location.href = basePath + '/login.jsp';
+            })
+            .finally(() => {
+                this.isLoadingUser = false;
             });
     },
     
@@ -59,22 +63,54 @@ const ProfilePage = {
      * 加载个人信息数据
      */
     loadProfileData: function() {
-        if (!this.currentUser) return;
-        
-        document.getElementById('userId').value = this.currentUser.id;
-        document.getElementById('username').value = this.currentUser.username;
-        document.getElementById('realName').value = this.currentUser.realName;
-        document.getElementById('userType').value = this.getUserTypeName(this.currentUser.userType);
-        document.getElementById('studentNo').value = this.currentUser.studentNo || '';
-        document.getElementById('email').value = this.currentUser.email || '';
-        document.getElementById('phone').value = this.currentUser.phone || '';
-        
-        if (this.currentUser.deptId) {
-            const dept = this.departments.find(d => d.id === this.currentUser.deptId);
-            document.getElementById('deptName').value = dept ? dept.deptName : '';
-        } else {
-            document.getElementById('deptName').value = '';
+        if (!this.currentUser) {
+            Logger.warn('currentUser为空，无法加载表单数据');
+            return;
         }
+        
+        Logger.log('加载表单数据 - 用户信息', this.currentUser);
+        
+        const userIdEl = document.getElementById('userId');
+        const usernameEl = document.getElementById('username');
+        const realNameEl = document.getElementById('realName');
+        const userTypeEl = document.getElementById('userType');
+        const studentNoEl = document.getElementById('studentNo');
+        const emailEl = document.getElementById('email');
+        const phoneEl = document.getElementById('phone');
+        const deptNameEl = document.getElementById('deptName');
+        
+        Logger.log('DOM元素检查', {
+            userIdEl: !!userIdEl,
+            usernameEl: !!usernameEl,
+            realNameEl: !!realNameEl,
+            userTypeEl: !!userTypeEl,
+            studentNoEl: !!studentNoEl,
+            emailEl: !!emailEl,
+            phoneEl: !!phoneEl,
+            deptNameEl: !!deptNameEl
+        });
+        
+        setTimeout(() => {
+            if (userIdEl) userIdEl.value = this.currentUser.id;
+            if (usernameEl) usernameEl.value = this.currentUser.username;
+            if (realNameEl) realNameEl.value = this.currentUser.realName;
+            if (userTypeEl) userTypeEl.value = this.getUserTypeName(this.currentUser.userType);
+            if (studentNoEl) studentNoEl.value = this.currentUser.studentNo || '';
+            if (emailEl) emailEl.value = this.currentUser.email || '';
+            if (phoneEl) phoneEl.value = this.currentUser.phone || '';
+            
+            if (this.currentUser.deptId) {
+                const dept = this.departments.find(d => d.id === this.currentUser.deptId);
+                if (deptNameEl) deptNameEl.value = dept ? dept.deptName : '';
+            } else {
+                if (deptNameEl) deptNameEl.value = '';
+            }
+            
+            Logger.log('表单数据已更新（延迟后）', {
+                email: emailEl ? emailEl.value : 'not found',
+                phone: phoneEl ? phoneEl.value : 'not found'
+            });
+        }, 100);
     },
     
     /**
@@ -118,7 +154,27 @@ const ProfilePage = {
             .then(() => {
                 Logger.log('个人信息修改成功');
                 ErrorHandler.showSuccess('个人信息修改成功', 'message');
-                this.loadCurrentUser();
+                
+                // 直接更新当前用户对象，不重新加载
+                this.currentUser.realName = realName;
+                this.currentUser.email = email || null;
+                this.currentUser.phone = phone || null;
+                
+                Logger.log('直接更新currentUser对象', this.currentUser);
+                
+                // 直接更新DOM，不重新加载
+                const emailEl = document.getElementById('email');
+                const phoneEl = document.getElementById('phone');
+                
+                if (emailEl) {
+                    emailEl.value = this.currentUser.email || '';
+                    Logger.log('DOM邮箱已更新为', emailEl.value);
+                }
+                
+                if (phoneEl) {
+                    phoneEl.value = this.currentUser.phone || '';
+                    Logger.log('DOM手机号已更新为', phoneEl.value);
+                }
             })
             .catch(error => {
                 Logger.error('修改失败', error);
@@ -203,8 +259,9 @@ const ProfilePage = {
 // 页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', function() {
     // 设置API基础URL
-    if (typeof contextPath !== 'undefined' && contextPath) {
+    if (typeof contextPath !== 'undefined' && contextPath && contextPath !== '') {
         AppConfig.apiBaseUrl = contextPath + '/api';
+        Logger.log('使用JSP设置的contextPath:', contextPath);
     } else {
         AppConfig.apiBaseUrl = '/api';
         Logger.warn('未找到contextPath，使用默认值 /api');

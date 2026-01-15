@@ -21,7 +21,7 @@
             <a href="${pageContext.request.contextPath}/index.jsp" class="nav-item">首页</a>
             <a href="${pageContext.request.contextPath}/profile.jsp" class="nav-item">个人信息</a>
             <a href="${pageContext.request.contextPath}/user-list.jsp" class="nav-item active">用户管理</a>
-            <a href="#" class="nav-item">公告管理</a>
+            <a href="${pageContext.request.contextPath}/announcement-list.jsp" class="nav-item">公告管理</a>
             <a href="#" class="nav-item">统计分析</a>
         </div>
         
@@ -85,7 +85,7 @@
                 
                 <div class="form-group">
                     <label for="username">用户名 *</label>
-                    <input type="text" id="username" name="username" required>
+                    <input type="text" id="username" name="username" required readonly>
                 </div>
                 
                 <div class="form-group">

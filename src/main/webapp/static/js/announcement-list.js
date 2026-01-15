@@ -11,14 +11,20 @@ const AnnouncementList = {
     // 当前用户信息
     currentUser: null,
     
+    // 加载状态
+    isLoading: false,
+    
+    // 当前筛选类型
+    currentFilterType: '',
+    
     /**
      * 初始化
      */
     init: function() {
         Logger.log('公告列表页面初始化');
         this.loadUserInfo();
-        this.loadAnnouncements();
         this.bindEvents();
+        this.loadAnnouncements();
     },
     
     /**
@@ -55,10 +61,15 @@ const AnnouncementList = {
      * 加载公告列表
      */
     loadAnnouncements: function() {
+        if (this.isLoading) {
+            Logger.log('正在加载中，跳过重复请求');
+            return;
+        }
+        
+        this.isLoading = true;
         Logger.log('开始加载公告列表');
         
         const params = {
-            // 可以添加查询参数
         };
         
         ApiClient.get('/announcement/list', params)
@@ -76,6 +87,9 @@ const AnnouncementList = {
             .catch(error => {
                 Logger.error('加载公告列表失败', error);
                 this.showError('加载公告失败：' + error.message);
+            })
+            .finally(() => {
+                this.isLoading = false;
             });
     },
     
@@ -195,16 +209,65 @@ const AnnouncementList = {
     },
     
     /**
+     * 按类型筛选公告（左侧筛选按钮）
+     */
+    filterByType: function(type) {
+        Logger.log('按类型筛选', { type });
+        this.currentFilterType = type;
+        
+        // 更新下拉框的值
+        const typeFilter = document.getElementById('typeFilter');
+        if (typeFilter) {
+            typeFilter.value = type;
+        }
+        
+        // 更新左侧筛选按钮的激活状态
+        this.updateFilterButtons(type);
+        
+        // 执行筛选
+        const keyword = document.getElementById('searchKeyword')?.value.toLowerCase() || '';
+        let filtered = this.currentAnnouncements;
+        
+        if (keyword) {
+            filtered = filtered.filter(ann => 
+                (ann.title && ann.title.toLowerCase().includes(keyword)) || 
+                (ann.content && ann.content.toLowerCase().includes(keyword))
+            );
+        }
+        
+        if (type) {
+            filtered = filtered.filter(ann => ann.announcementType == type);
+        }
+        
+        this.renderAnnouncements(filtered);
+    },
+    
+    /**
+     * 更新左侧筛选按钮的激活状态
+     */
+    updateFilterButtons: function(activeType) {
+        const filterOptions = document.querySelectorAll('.filter-option');
+        filterOptions.forEach((option, index) => {
+            const typeMap = { 0: '', 1: '1', 2: '2', 3: '3' };
+            const optionType = typeMap[index];
+            
+            if (optionType === activeType) {
+                option.classList.add('active');
+            } else {
+                option.classList.remove('active');
+            }
+        });
+    },
+    
+    /**
      * 绑定事件
      */
     bindEvents: function() {
-        // 搜索按钮
         const searchBtn = document.querySelector('.btn-search');
         if (searchBtn) {
             searchBtn.addEventListener('click', () => this.searchAnnouncements());
         }
         
-        // 搜索框回车
         const searchInput = document.getElementById('searchKeyword');
         if (searchInput) {
             searchInput.addEventListener('keypress', (e) => {
@@ -212,13 +275,30 @@ const AnnouncementList = {
                     this.searchAnnouncements();
                 }
             });
+            
+            searchInput.addEventListener('input', Utils.debounce(() => {
+                this.searchAnnouncements();
+            }, 500));
         }
         
-        // 类型筛选
         const typeFilter = document.getElementById('typeFilter');
         if (typeFilter) {
-            typeFilter.addEventListener('change', () => this.searchAnnouncements());
+            typeFilter.addEventListener('change', () => {
+                this.currentFilterType = typeFilter.value;
+                this.updateFilterButtons(typeFilter.value);
+                this.searchAnnouncements();
+            });
         }
+        
+        // 绑定左侧筛选按钮的点击事件
+        const filterOptions = document.querySelectorAll('.filter-option');
+        filterOptions.forEach((option, index) => {
+            option.addEventListener('click', () => {
+                const typeMap = { 0: '', 1: '1', 2: '2', 3: '3' };
+                const type = typeMap[index];
+                this.filterByType(type);
+            });
+        });
     },
     
     /**

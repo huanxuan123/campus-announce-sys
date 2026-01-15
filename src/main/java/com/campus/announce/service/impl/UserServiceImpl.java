@@ -119,7 +119,12 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public int updateUser(User user) {
-        return userMapper.update(user);
+        logger.info("Service层更新用户 - ID: {}, 用户名: {}, 真实姓名: {}, 类型: {}, 部门: {}, 邮箱: {}, 手机: {}, 状态: {}", 
+                user.getId(), user.getUsername(), user.getRealName(), user.getUserType(),
+                user.getDeptId(), user.getEmail(), user.getPhone(), user.getStatus());
+        int result = userMapper.update(user);
+        logger.info("Service层更新用户结果 - 影响行数: {}", result);
+        return result;
     }
 
     @Override

@@ -46,8 +46,8 @@ const ApiClient = {
     /**
      * 发送PUT请求
      */
-    put: function(url, data) {
-        return this.request('PUT', url, data);
+    put: function(url, data, params) {
+        return this.request('PUT', url, data, params);
     },
     
     /**
@@ -220,67 +220,66 @@ const ErrorHandler = {
      * 显示错误消息
      */
     showError: function(message, containerId) {
+        Logger.log('显示错误消息', { message, containerId });
         const container = containerId ? document.getElementById(containerId) : document.body;
         if (!container) {
             alert('错误: ' + message);
             return;
         }
         
-        const errorHtml = `
-            <div class="error-message" style="
-                background: #fee;
-                border: 1px solid #fcc;
-                border-radius: 4px;
-                padding: 16px;
-                margin: 16px 0;
-                color: #c33;
-            ">
-                <h3 style="margin: 0 0 8px 0; font-size: 16px;">
-                    <i class="fas fa-exclamation-circle"></i> 错误
-                </h3>
-                <p style="margin: 0; line-height: 1.6;">${this.escapeHtml(message)}</p>
-                <button onclick="this.parentElement.remove()" style="
-                    margin-top: 12px;
-                    padding: 6px 12px;
-                    background: #c33;
-                    color: white;
-                    border: none;
-                    border-radius: 4px;
-                    cursor: pointer;
-                ">关闭</button>
-            </div>
-        `;
+        Logger.log('容器元素', { 
+            id: container.id, 
+            className: container.className, 
+            tagName: container.tagName,
+            offsetParent: container.offsetParent?.tagName,
+            style: {
+                position: window.getComputedStyle(container).position,
+                display: window.getComputedStyle(container).display,
+                zIndex: window.getComputedStyle(container).zIndex,
+                top: window.getComputedStyle(container).top,
+                right: window.getComputedStyle(container).right
+            }
+        });
+        
+        const errorHtml = '<div class="error-message" style="background: #fee; border: 1px solid #fcc; border-radius: 4px; padding: 16px; margin: 16px 0; color: #c33; min-width: 300px; max-width: 500px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);"><h3 style="margin: 0 0 8px 0; font-size: 16px;">✗ 错误</h3><p style="margin: 0; line-height: 1.6;">' + this.escapeHtml(message) + '</p></div>';
+        
+        Logger.log('错误消息HTML', errorHtml);
         
         container.insertAdjacentHTML('afterbegin', errorHtml);
+        
+        Logger.log('错误消息已插入');
+        Logger.log('容器子元素数量', container.children.length);
+        Logger.log('容器HTML', container.innerHTML);
+        
+        // 3秒后自动消失
+        setTimeout(() => {
+            const msg = container.querySelector('.error-message');
+            if (msg) {
+                msg.style.transition = 'opacity 0.3s';
+                msg.style.opacity = '0';
+                setTimeout(() => msg.remove(), 300);
+            }
+        }, 3000);
     },
     
     /**
      * 显示成功消息
      */
     showSuccess: function(message, containerId) {
+        Logger.log('显示成功消息', { message, containerId });
         const container = containerId ? document.getElementById(containerId) : document.body;
         if (!container) {
             alert('成功: ' + message);
             return;
         }
         
-        const successHtml = `
-            <div class="success-message" style="
-                background: #efe;
-                border: 1px solid #cfc;
-                border-radius: 4px;
-                padding: 16px;
-                margin: 16px 0;
-                color: #3c3;
-            ">
-                <h3 style="margin: 0 0 8px 0; font-size: 16px;">
-                    <i class="fas fa-check-circle"></i> 成功
-                </h3>
-                <p style="margin: 0; line-height: 1.6;">${this.escapeHtml(message)}</p>
-            </div>
-        `;
+        const successHtml = '<div class="success-message" style="background: #efe; border: 1px solid #cfc; border-radius: 4px; padding: 16px; margin: 16px 0; color: #3c3; min-width: 300px; max-width: 500px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);"><h3 style="margin: 0 0 8px 0; font-size: 16px;">✓ 成功</h3><p style="margin: 0; line-height: 1.6;">' + this.escapeHtml(message) + '</p></div>';
+        
+        Logger.log('成功消息HTML', successHtml);
         
         container.insertAdjacentHTML('afterbegin', successHtml);
+        
+        Logger.log('成功消息已插入');
         
         // 3秒后自动消失
         setTimeout(() => {

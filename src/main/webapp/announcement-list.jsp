@@ -7,46 +7,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>公告列表 - 校园公告系统</title>
-    <!-- 使用jsDelivr CDN，移除integrity避免校验失败 -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" 
-          crossorigin="anonymous"
-          onerror="this.onerror=null; this.href=''; console.warn('Font Awesome CDN加载失败，将使用Unicode字符代替');">
+    <link rel="icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
+    <!-- 使用本地Unicode字符，避免CDN加载超时 -->
     <style>
-        /* 备用图标样式 - 如果Font Awesome加载失败，使用Unicode字符 */
-        .icon-fallback {
-            display: inline-block;
-            font-style: normal;
-            font-weight: normal;
-            line-height: 1;
-        }
-        
-        /* 确保即使Font Awesome未加载，页面也能正常显示 */
-        .fas, .fa {
-            display: inline-block;
-            font-style: normal;
-            font-variant: normal;
-            text-rendering: auto;
-            line-height: 1;
-        }
-        
-        /* 如果Font Awesome未加载，使用Unicode字符作为备用 */
-        .fa-bullhorn::before { content: '📢'; }
-        .fa-user-circle::before { content: '👤'; }
-        .fa-sign-out-alt::before { content: '🚪'; }
-        .fa-filter::before { content: '🔍'; }
-        .fa-th::before { content: '☰'; }
-        .fa-info-circle::before { content: 'ℹ️'; }
-        .fa-calendar::before { content: '📅'; }
-        .fa-ellipsis-h::before { content: '⋯'; }
-        .fa-search::before { content: '🔍'; }
-        .fa-spinner::before { content: '⏳'; }
-        .fa-inbox::before { content: '📥'; }
-        .fa-user::before { content: '👤'; }
-        .fa-eye::before { content: '👁️'; }
-        .fa-exclamation-circle::before { content: '⚠️'; }
-        .fa-redo::before { content: '🔄'; }
-        .fa-sign-in-alt::before { content: '🔑'; }
-        
         * {
             margin: 0;
             padding: 0;

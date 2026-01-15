@@ -50,12 +50,14 @@
     <update id="update" parameterType="com.campus.announce.entity.User">
         UPDATE sys_user
         <set>
-            <if test="realName != null">real_name = #{realName},</if>
+            <if test="realName != null and realName != ''">real_name = #{realName},</if>
+            <if test="userType != null">user_type = #{userType},</if>
             <if test="deptId != null">dept_id = #{deptId},</if>
-            <if test="email != null">email = #{email},</if>
-            <if test="phone != null">phone = #{phone},</if>
+            <if test="studentNo != null and studentNo != ''">student_no = #{studentNo},</if>
+            <if test="email != null and email != ''">email = #{email},</if>
+            <if test="phone != null and phone != ''">phone = #{phone},</if>
             <if test="status != null">status = #{status},</if>
-            <if test="password != null">password = #{password},</if>
+            <if test="password != null and password != ''">password = #{password},</if>
         </set>
         WHERE id = #{id}
     </update>

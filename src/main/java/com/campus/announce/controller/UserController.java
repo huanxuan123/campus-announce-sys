@@ -3,6 +3,8 @@ package com.campus.announce.controller;
 import com.campus.announce.common.Result;
 import com.campus.announce.entity.User;
 import com.campus.announce.service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,7 +13,9 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
-
+    
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
+    
     @Autowired
     private UserService userService;
 
@@ -61,10 +65,15 @@ public class UserController {
     @PutMapping("/{id}")
     public Result<String> updateUser(@PathVariable Long id, @RequestBody User user) {
         try {
+            logger.info("更新用户 - ID: {}, 用户名: {}, 真实姓名: {}, 类型: {}, 部门: {}, 邮箱: {}, 手机: {}, 状态: {}", 
+                id, user.getUsername(), user.getRealName(), user.getUserType(), 
+                user.getDeptId(), user.getEmail(), user.getPhone(), user.getStatus());
             user.setId(id);
-            userService.updateUser(user);
+            int result = userService.updateUser(user);
+            logger.info("更新用户结果 - 影响行数: {}", result);
             return Result.success("更新成功");
         } catch (Exception e) {
+            logger.error("更新用户失败", e);
             return Result.error("更新失败：" + e.getMessage());
         }
     }

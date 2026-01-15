@@ -51,6 +51,12 @@ public class LoginInterceptor implements HandlerInterceptor {
      * 判断是否为公开路径（不需要登录）
      */
     private boolean isPublicPath(String path) {
+        // 去除查询参数
+        int queryIndex = path.indexOf('?');
+        if (queryIndex > 0) {
+            path = path.substring(0, queryIndex);
+        }
+        
         // 静态资源
         if (path.startsWith("/static/") || path.startsWith("/uploads/") || path.startsWith("/api/")) {
             return true;

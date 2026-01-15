@@ -206,7 +206,6 @@ body {
     border-radius: 5px;
     font-size: 14px;
     text-align: center;
-    display: none;
 }
 
 .message.success {

@@ -289,7 +289,9 @@ const UserPage = {
         const email = document.getElementById('email').value.trim();
         const phone = document.getElementById('phone').value.trim();
         const status = document.getElementById('status').value;
-        const password = document.getElementById('password').value;
+        const password = document.getElementById('password').value.trim();
+        
+        Logger.log('保存用户 - 表单数据', { userId, username, realName, userType, deptId, studentNo, email, phone, status, password });
         
         if (!username || !realName || !userType) {
             ErrorHandler.showError('请填写必填项', 'message');
@@ -319,16 +321,16 @@ const UserPage = {
         
         if (!userId) {
             userData.password = password;
-        }
-        
-        if (userId && password) {
+        } else if (password) {
             userData.password = password;
         }
         
-        Logger.log('保存用户', { userId, username });
+        Logger.log('保存用户 - 构建的数据', userData);
         
         const url = userId ? '/user/' + userId : '/user';
         const method = userId ? 'put' : 'post';
+        
+        Logger.log('保存用户 - 请求信息', { url, method, userId });
         
         ApiClient[method](url, userData)
             .then(() => {

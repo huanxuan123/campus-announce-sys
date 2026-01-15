@@ -44,11 +44,12 @@
     </bean>
 
     <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-        <property name="prefix" value="/WEB-INF/views/"/>
+        <property name="prefix" value="/"/>
         <property name="suffix" value=".jsp"/>
         <property name="order" value="1"/>
     </bean>
 
+    
     <!-- 直接映射静态JSP页面 -->
     <mvc:view-controller path="/login.jsp" view-name="forward:/login.jsp"/>
     <mvc:view-controller path="/register.jsp" view-name="forward:/register.jsp"/>

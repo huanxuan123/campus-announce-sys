@@ -181,7 +181,7 @@ public class ConfigController {
         
         try {
             String configValue = params.get("configValue");
-            int result = configService.updateValue(configKey, configValue);
+            int result = configService.updateConfig(configKey, configValue);
             if (result > 0) {
                 return Result.success("更新成功");
             } else {
@@ -193,7 +193,14 @@ public class ConfigController {
     }
 
     @GetMapping("/announcementRetentionDays")
-    public Result<String> getAnnouncementRetentionDays() {
+    public Result<String> getAnnouncementRetentionDays(HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return Result.error("未登录");
+        }
+        if (user.getUserType() != 1) {
+            return Result.error("只有超级管理员可以查看系统配置");
+        }
         try {
             String value = configService.getAnnouncementRetentionDays();
             return Result.success(value);
@@ -201,9 +208,16 @@ public class ConfigController {
             return Result.error("查询失败：" + e.getMessage());
         }
     }
-
+    
     @GetMapping("/maxTopAnnouncements")
-    public Result<String> getMaxTopAnnouncements() {
+    public Result<String> getMaxTopAnnouncements(HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return Result.error("未登录");
+        }
+        if (user.getUserType() != 1) {
+            return Result.error("只有超级管理员可以查看系统配置");
+        }
         try {
             String value = configService.getMaxTopAnnouncements();
             return Result.success(value);
@@ -211,9 +225,16 @@ public class ConfigController {
             return Result.error("查询失败：" + e.getMessage());
         }
     }
-
+    
     @GetMapping("/maxAttachmentSize")
-    public Result<String> getMaxAttachmentSize() {
+    public Result<String> getMaxAttachmentSize(HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return Result.error("未登录");
+        }
+        if (user.getUserType() != 1) {
+            return Result.error("只有超级管理员可以查看系统配置");
+        }
         try {
             String value = configService.getMaxAttachmentSize();
             return Result.success(value);
@@ -221,9 +242,16 @@ public class ConfigController {
             return Result.error("查询失败：" + e.getMessage());
         }
     }
-
+    
     @GetMapping("/allowedFileTypes")
-    public Result<String> getAllowedFileTypes() {
+    public Result<String> getAllowedFileTypes(HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return Result.error("未登录");
+        }
+        if (user.getUserType() != 1) {
+            return Result.error("只有超级管理员可以查看系统配置");
+        }
         try {
             String value = configService.getAllowedFileTypes();
             return Result.success(value);

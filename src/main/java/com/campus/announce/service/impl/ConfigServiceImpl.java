@@ -33,6 +33,11 @@ public class ConfigServiceImpl implements ConfigService {
     public int updateValue(String configKey, String configValue) {
         return configMapper.updateValue(configKey, configValue);
     }
+    
+    @Override
+    public int updateConfig(String configKey, String configValue) {
+        return configMapper.updateConfig(configKey, configValue);
+    }
 
     @Override
     public int insertConfig(String configKey, String configValue, String configDesc) {

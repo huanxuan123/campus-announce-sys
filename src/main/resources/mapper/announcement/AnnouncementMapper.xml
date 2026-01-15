@@ -112,6 +112,8 @@
             <if test="scope != null">scope = #{scope},</if>
             <if test="deptId != null">dept_id = #{deptId},</if>
             <if test="deadline != null">deadline = #{deadline},</if>
+            <if test="isTop != null">is_top = #{isTop},</if>
+            <if test="topOrder != null">top_order = #{topOrder},</if>
         </set>
         WHERE id = #{id}
     </update>

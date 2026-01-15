@@ -452,6 +452,122 @@
             margin-bottom: 24px;
         }
         
+        .sidebar-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 24px 0;
+        }
+        
+        .btn-system-settings {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-system-settings:hover {
+            background: var(--primary-dark);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal.show {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+            font-size: 18px;
+            color: #1f2937;
+        }
+        
+        .modal-header .close {
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--gray);
+            transition: color 0.2s;
+        }
+        
+        .modal-header .close:hover {
+            color: var(--danger);
+        }
+        
+        .modal-body {
+            padding: 24px;
+        }
+        
+        .settings-group {
+            margin-bottom: 20px;
+        }
+        
+        .settings-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #374151;
+            font-weight: 500;
+        }
+        
+        .settings-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        
+        .settings-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            padding: 20px 24px;
+            border-top: 1px solid var(--border);
+        }
+        
         @media (max-width: 1024px) {
             .main-content {
                 grid-template-columns: 1fr;
@@ -540,6 +656,18 @@
                         </div>
                     </div>
                 </div>
+                
+                <div class="sidebar-divider"></div>
+                
+                <div class="sidebar-title">
+                    <i class="fas fa-cog"></i> 系统设置
+                </div>
+                
+                <div class="filter-group">
+                    <button class="btn-system-settings" onclick="AnnouncementList.showSystemSettings()">
+                        <i class="fas fa-sliders-h"></i> 系统参数设置
+                    </button>
+                </div>
             </div>
             
             <!-- Content Area -->
@@ -571,6 +699,37 @@
             </div>
         </div>
     </div>
+    
+    <!-- 系统参数设置模态框 -->
+    <div id="systemSettingsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>系统参数设置</h3>
+                <span class="close" onclick="AnnouncementList.closeSystemSettings()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="settings-group">
+                    <label class="settings-label">公告保留时长（天）</label>
+                    <input type="number" id="retentionDays" class="settings-input" min="0" placeholder="0表示永久保留">
+                </div>
+                <div class="settings-group">
+                    <label class="settings-label">置顶公告数量限制</label>
+                    <input type="number" id="maxTopAnnouncements" class="settings-input" min="0" placeholder="0表示不限制">
+                </div>
+                <div class="settings-group">
+                    <label class="settings-label">单个附件大小限制（MB）</label>
+                    <input type="number" id="maxAttachmentSize" class="settings-input" min="0" step="0.1" placeholder="0表示不限制">
+                </div>
+                <div class="settings-group">
+                    <label class="settings-label">允许的文件类型</label>
+                    <input type="text" id="allowedFileTypes" class="settings-input" placeholder="例如：jpg,png,pdf,doc,docx">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="AnnouncementList.closeSystemSettings()">取消</button>
+                <button class="btn btn-primary" onclick="AnnouncementList.saveSystemSettings()">保存</button>
+            </div>
+        </div>
     
     <!-- 引入通用工具和业务逻辑 -->
     <script>

@@ -81,11 +81,11 @@
                 <span class="close" onclick="closeModal()">&times;</span>
             </div>
             <form id="userForm" class="modal-body">
-                <input type="hidden" id="userId" name="id">
+                <input type="hidden" id="userFormUserId" name="id">
                 
                 <div class="form-group">
                     <label for="username">用户名 *</label>
-                    <input type="text" id="username" name="username" required readonly>
+                    <input type="text" id="userFormUsername" name="username" required>
                 </div>
                 
                 <div class="form-group">

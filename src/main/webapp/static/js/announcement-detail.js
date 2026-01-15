@@ -48,12 +48,17 @@ const AnnouncementDetail = {
         
         const ann = this.announcement;
         const typeLabel = this.getTypeLabel(ann.announcementType);
+        const scopeLabel = this.getScopeLabel(ann.scope);
+        const deptName = this.getDeptName(ann.deptCode);
         const contextPath = AppConfig.apiBaseUrl.replace('/api', '') || '';
         
         const html = `
             <div class="announcement-type type-${ann.announcementType}">
                 ${typeLabel}
             </div>
+            ${ann.scope === 2 && deptName ? `
+            <div class="announcement-scope">${scopeLabel} · ${deptName}</div>
+            ` : ''}
             
             <h2 class="announcement-title">${ErrorHandler.escapeHtml(ann.title || '无标题')}</h2>
             
@@ -141,6 +146,28 @@ const AnnouncementDetail = {
             case 3: return '📌 其他';
             default: return '📰 公告';
         }
+    },
+    
+    getScopeLabel: function(scope) {
+        switch(scope) {
+            case 1: return '🌐 全校';
+            case 2: return '🏫 院系';
+            default: return '📰 公告';
+        }
+    },
+    
+    getDeptName: function(deptCode) {
+        if (!deptCode) return '';
+        
+        const deptMap = {
+            'CS': '计算机学院',
+            'SE': '软件学院',
+            'IE': '信息工程学院',
+            'EE': '电子工程学院',
+            'ME': '机械工程学院'
+        };
+        
+        return deptMap[deptCode] || deptCode;
     },
     
     formatContent: function(content) {

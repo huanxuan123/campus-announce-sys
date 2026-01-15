@@ -164,11 +164,23 @@ const AnnouncementList = {
         const announcementId = ann.id;
         const contextPath = AppConfig.apiBaseUrl.replace('/api', '') || '';
         
+        const scope = ann.scope || 1;
+        const scopeLabel = this.getScopeLabel(scope);
+        const deptName = this.getDeptName(ann.deptCode);
+        
         let adminButton = '';
-        if (this.currentUser && this.currentUser.userType === 1) {
-            adminButton = '<a href="' + contextPath + '/announcement-admin-detail.jsp?id=' + announcementId + '" class="btn btn-sm" style="background: #8b5cf6; color: white;">' +
-                '<i class="fas fa-cog"></i> 管理员详情' +
-                '</a>';
+        if (this.currentUser) {
+            if (this.currentUser.userType === 1) {
+                adminButton = '<a href="' + contextPath + '/announcement-admin-detail.jsp?id=' + announcementId + '" class="btn btn-sm" style="background: #8b5cf6; color: white;">' +
+                        '<i class="fas fa-cog"></i> 管理员详情' +
+                        '</a>';
+            } else if (this.currentUser.userType === 2) {
+                if (ann.scope === 2 && ann.deptId === this.currentUser.deptId) {
+                    adminButton = '<a href="' + contextPath + '/announcement-admin-detail.jsp?id=' + announcementId + '" class="btn btn-sm" style="background: #8b5cf6; color: white;">' +
+                            '<i class="fas fa-cog"></i> 管理员详情' +
+                            '</a>';
+                }
+            }
         }
         
         return '<div class="announcement-card' + (isTop ? ' is-top' : '') + '">' +
@@ -176,6 +188,7 @@ const AnnouncementList = {
             '<span class="announcement-type type-' + announcementType + '">' +
             ErrorHandler.escapeHtml(typeLabel) +
             '</span>' +
+            '<span class="announcement-scope">' + ErrorHandler.escapeHtml(scopeLabel) + (deptName ? ' · ' + deptName : '') + '</span>' +
             '</div>' +
             '<h3 class="announcement-title">' +
             '<a href="' + contextPath + '/announcement-detail.jsp?id=' + announcementId + '">' +
@@ -215,6 +228,28 @@ const AnnouncementList = {
             case 3: return '📌 其他';
             default: return '📰 公告';
         }
+    },
+    
+    getScopeLabel: function(scope) {
+        switch(scope) {
+            case 1: return '🌐 全校';
+            case 2: return '🏫 院系';
+            default: return '📰 公告';
+        }
+    },
+    
+    getDeptName: function(deptCode) {
+        if (!deptCode) return '';
+        
+        const deptMap = {
+            'CS': '计算机学院',
+            'SE': '软件学院',
+            'IE': '信息工程学院',
+            'EE': '电子工程学院',
+            'ME': '机械工程学院'
+        };
+        
+        return deptMap[deptCode] || deptCode;
     },
     
     /**

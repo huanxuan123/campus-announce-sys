@@ -78,6 +78,8 @@ const UserPage = {
                             deptSelect.appendChild(option);
                         });
                     }
+                    Logger.log('部门列表加载完成，重新渲染用户表格');
+                    this.renderUserTable(this.users);
                 }
             })
             .catch(error => {
@@ -194,8 +196,29 @@ const UserPage = {
      */
     getDeptName: function(deptId) {
         if (!deptId) return '-';
+        
         const dept = this.departments.find(d => d.id === deptId);
-        return dept ? ErrorHandler.escapeHtml(dept.deptName) : '-';
+        if (dept) {
+            const deptName = dept.deptName || '';
+            const deptCode = dept.deptCode || '';
+            
+            const deptMap = {
+                'Computer Science': '计算机学院',
+                'Software Engineering': '软件学院',
+                'Information Engineering': '信息工程学院',
+                'Electronic Engineering': '电子工程学院',
+                'Mechanical Engineering': '机械工程学院',
+                'CS': '计算机学院',
+                'SE': '软件学院',
+                'IE': '信息工程学院',
+                'EE': '电子工程学院',
+                'ME': '机械工程学院'
+            };
+            
+            return deptMap[deptName] || deptMap[deptCode] || deptName;
+        }
+        
+        return '-';
     },
     
     /**
@@ -238,8 +261,9 @@ const UserPage = {
         
         document.getElementById('modalTitle').textContent = '添加用户';
         document.getElementById('userForm').reset();
-        document.getElementById('userId').value = '';
+        document.getElementById('userFormUserId').value = '';
         document.getElementById('password').value = '';
+        document.getElementById('userFormUsername').removeAttribute('readonly');
         document.getElementById('userModal').classList.add('show');
     },
     
@@ -256,8 +280,9 @@ const UserPage = {
         if (!user) return;
         
         document.getElementById('modalTitle').textContent = '编辑用户';
-        document.getElementById('userId').value = user.id;
-        document.getElementById('username').value = user.username;
+        document.getElementById('userFormUserId').value = user.id;
+        document.getElementById('userFormUsername').value = user.username;
+        document.getElementById('userFormUsername').setAttribute('readonly', 'readonly');
         document.getElementById('realName').value = user.realName;
         document.getElementById('userType').value = user.userType;
         document.getElementById('deptId').value = user.deptId || '';
@@ -274,14 +299,15 @@ const UserPage = {
      */
     closeModal: function() {
         document.getElementById('userModal').classList.remove('show');
+        document.getElementById('userFormUsername').removeAttribute('readonly');
     },
     
     /**
      * 保存用户
      */
     saveUser: function() {
-        const userId = document.getElementById('userId').value;
-        const username = document.getElementById('username').value.trim();
+        const userId = document.getElementById('userFormUserId').value;
+        const username = document.getElementById('userFormUsername').value.trim();
         const realName = document.getElementById('realName').value.trim();
         const userType = document.getElementById('userType').value;
         const deptId = document.getElementById('deptId').value;

@@ -292,7 +292,7 @@
         <div class="header">
             <div class="header-content">
                 <div class="header-title">
-                    <h1>公告管理</h1>
+                    <h1><a href="${pageContext.request.contextPath}/announcement-list.jsp" style="color: white; text-decoration: none;">公告管理</a></h1>
                 </div>
                 <div class="header-actions">
                     <a href="${pageContext.request.contextPath}/announcement-list.jsp" class="btn btn-secondary">

@@ -44,8 +44,7 @@ public class AnnouncementController {
             
             if (user != null) {
                 if (user.getUserType() == 2) {
-                    params.put("deptId", user.getDeptId());
-                    logger.info("院系管理员，限制部门ID: {}", user.getDeptId());
+                    logger.info("院系管理员，可以查看所有公告");
                 } else {
                     if (user.getUserType() == 3 || user.getUserType() == 4) {
                         if (deptId != null && !deptId.equals(user.getDeptId())) {

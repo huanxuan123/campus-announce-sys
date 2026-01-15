@@ -118,6 +118,17 @@
             color: #6b7280;
         }
         
+        .announcement-scope {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+        
         .announcement-title {
             font-size: 28px;
             font-weight: 700;
@@ -279,7 +290,7 @@
         <div class="header">
             <div class="header-content">
                 <div class="header-title">
-                    <h1>公告详情</h1>
+                    <h1><a href="${pageContext.request.contextPath}/announcement-list.jsp" style="color: white; text-decoration: none;">公告详情</a></h1>
                 </div>
                 <div class="header-actions">
                     <a href="${pageContext.request.contextPath}/announcement-list.jsp" class="btn btn-secondary">

@@ -36,7 +36,7 @@
                     
                     <div class="form-group">
                         <label for="username">用户名</label>
-                        <input type="text" id="username" name="username" readonly>
+                        <input type="text" id="profileUsername" name="username" readonly>
                     </div>
                     
                     <div class="form-group">

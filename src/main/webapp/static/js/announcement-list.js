@@ -137,7 +137,6 @@ const AnnouncementList = {
         const viewCount = ann.viewCount || 0;
         const publishTime = Utils.formatDate(ann.publishTime);
         const announcementId = ann.id;
-        // 从API基础URL中提取contextPath
         const contextPath = AppConfig.apiBaseUrl.replace('/api', '') || '';
         
         return '<div class="announcement-card' + (isTop ? ' is-top' : '') + '">' +
@@ -147,7 +146,7 @@ const AnnouncementList = {
             '</span>' +
             '</div>' +
             '<h3 class="announcement-title">' +
-            '<a href="' + contextPath + '/announcement/' + announcementId + '">' +
+            '<a href="' + contextPath + '/announcement-detail.jsp?id=' + announcementId + '">' +
             title +
             '</a>' +
             '</h3>' +
@@ -166,7 +165,7 @@ const AnnouncementList = {
             content +
             '</div>' +
             '<div class="announcement-footer">' +
-            '<a href="' + contextPath + '/announcement/' + announcementId + '" class="btn btn-sm" style="background: var(--primary); color: white;">' +
+            '<a href="' + contextPath + '/announcement-detail.jsp?id=' + announcementId + '" class="btn btn-sm" style="background: var(--primary); color: white;">' +
             '<i class="fas fa-eye"></i> 查看详情' +
             '</a>' +
             '</div>' +

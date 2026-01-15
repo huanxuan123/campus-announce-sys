@@ -22,6 +22,7 @@ public class Announcement implements Serializable {
 
     private String publisherName;
     private String deptName;
+    private String deptCode;
     private Integer readCount;
     private Integer unreadCount;
 
@@ -156,11 +157,19 @@ public class Announcement implements Serializable {
     public String getDeptName() {
         return deptName;
     }
-
+    
     public void setDeptName(String deptName) {
         this.deptName = deptName;
     }
-
+    
+    public String getDeptCode() {
+        return deptCode;
+    }
+    
+    public void setDeptCode(String deptCode) {
+        this.deptCode = deptCode;
+    }
+    
     public Integer getReadCount() {
         return readCount;
     }

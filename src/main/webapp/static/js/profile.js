@@ -71,7 +71,7 @@ const ProfilePage = {
         Logger.log('加载表单数据 - 用户信息', this.currentUser);
         
         const userIdEl = document.getElementById('userId');
-        const usernameEl = document.getElementById('username');
+        const usernameEl = document.getElementById('profileUsername');
         const realNameEl = document.getElementById('realName');
         const userTypeEl = document.getElementById('userType');
         const studentNoEl = document.getElementById('studentNo');

@@ -353,6 +353,18 @@
             color: #0c4a6e;
         }
         
+        .announcement-scope {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            margin-left: 8px;
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+        
         .announcement-title {
             font-size: 18px;
             font-weight: 700;
@@ -610,6 +622,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="wrapper">
         <!-- Header -->
@@ -617,7 +630,7 @@
             <div class="header-content">
                 <div class="header-title">
                     <i class="fas fa-bullhorn"></i>
-                    <h1>校园公告</h1>
+                    <h1><a href="${pageContext.request.contextPath}/index.jsp" style="color: white; text-decoration: none;">校园公告</a></h1>
                 </div>
                 <div class="header-actions">
                     <div class="user-card">
@@ -671,7 +684,7 @@
             </div>
             
             <!-- Content Area -->
-            <div>
+            <div class="content-area">
                 <!-- Search Area -->
                 <div class="search-area">
                     <div class="search-container">

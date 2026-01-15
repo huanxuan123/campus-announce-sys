@@ -21,6 +21,7 @@
         <result column="update_time" property="updateTime"/>
         <result column="publisher_name" property="publisherName"/>
         <result column="dept_name" property="deptName"/>
+        <result column="dept_code" property="deptCode"/>
         <result column="read_count" property="readCount"/>
         <result column="unread_count" property="unreadCount"/>
     </resultMap>
@@ -28,7 +29,8 @@
     <select id="selectById" resultMap="BaseResultMap">
         SELECT a.*,
                u.real_name as publisher_name,
-               d.dept_name
+               d.dept_name,
+               d.dept_code
         FROM sys_announcement a
         LEFT JOIN sys_user u ON a.publisher_id = u.id
         LEFT JOIN sys_department d ON a.dept_id = d.id
@@ -39,6 +41,7 @@
         SELECT a.*,
                u.real_name as publisher_name,
                d.dept_name,
+               d.dept_code,
                (SELECT COUNT(*) FROM sys_announcement_read ar WHERE ar.announcement_id = a.id) as read_count,
                (SELECT COUNT(*) FROM sys_user WHERE user_type IN (3,4) AND status = 1) - (SELECT COUNT(*) FROM sys_announcement_read ar WHERE ar.announcement_id = a.id) as unread_count
         FROM sys_announcement a
@@ -69,7 +72,8 @@
     <select id="selectByScopeAndDept" resultMap="BaseResultMap">
         SELECT a.*,
                u.real_name as publisher_name,
-               d.dept_name
+               d.dept_name,
+               d.dept_code
         FROM sys_announcement a
         LEFT JOIN sys_user u ON a.publisher_id = u.id
         LEFT JOIN sys_department d ON a.dept_id = d.id
@@ -84,7 +88,8 @@
     <select id="selectTopAnnouncements" resultMap="BaseResultMap">
         SELECT a.*,
                u.real_name as publisher_name,
-               d.dept_name
+               d.dept_name,
+               d.dept_code
         FROM sys_announcement a
         LEFT JOIN sys_user u ON a.publisher_id = u.id
         LEFT JOIN sys_department d ON a.dept_id = d.id

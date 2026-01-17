@@ -79,42 +79,12 @@ public class StatisticsController {
         System.out.println("请求参数：announcementId = " + announcementId + "，类型：" + (announcementId != null ? announcementId.getClass().getName() : "null"));
         
         try {
-            // 直接返回固定的模拟数据，用于测试前端显示
-            System.out.println("返回模拟数据，跳过数据库查询");
+            // 调用Service层方法获取真实数据
+            System.out.println("准备调用statisticsService.getAnnouncementReadStatistics");
+            List<Map<String, Object>> list = statisticsService.getAnnouncementReadStatistics(announcementId);
             
-            List<Map<String, Object>> list = new ArrayList<>();
-            Map<String, Object> data1 = new HashMap<>();
-            data1.put("announcement_id", 1L);
-            data1.put("title", "2026年春季学期开学通知");
-            data1.put("announcement_type", 1);
-            data1.put("publish_time", new Date());
-            data1.put("read_count", 5);
-            data1.put("total_users", 7);
-            data1.put("unread_count", 2);
-            list.add(data1);
-            
-            Map<String, Object> data2 = new HashMap<>();
-            data2.put("announcement_id", 2L);
-            data2.put("title", "校园安全管理通知");
-            data2.put("announcement_type", 1);
-            data2.put("publish_time", new Date());
-            data2.put("read_count", 3);
-            data2.put("total_users", 7);
-            data2.put("unread_count", 4);
-            list.add(data2);
-            
-            Map<String, Object> data3 = new HashMap<>();
-            data3.put("announcement_id", 3L);
-            data3.put("title", "图书馆开放时间调整通知");
-            data3.put("announcement_type", 1);
-            data3.put("publish_time", new Date());
-            data3.put("read_count", 6);
-            data3.put("total_users", 7);
-            data3.put("unread_count", 1);
-            list.add(data3);
-            
-            System.out.println("模拟数据：" + list);
-            System.out.println("模拟数据大小：" + list.size());
+            System.out.println("查询结果：" + list);
+            System.out.println("查询结果大小：" + (list != null ? list.size() : "null"));
             System.out.println("=== 公告阅读统计请求处理完成 ===");
             
             return Result.success(list);

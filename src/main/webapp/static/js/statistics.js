@@ -1117,16 +1117,7 @@ function renderReadStatisticsChart(data, attempt = 0) {
                 itemStyle: {
                     color: '#667eea'
                 },
-                barWidth: '30%' // 调整柱子宽度
-            },
-            {
-                name: '未读数',
-                type: 'bar',
-                data: displayData.map(item => item.unread_count || 0),
-                itemStyle: {
-                    color: '#f093fb'
-                },
-                barWidth: '30%' // 调整柱子宽度
+                barWidth: '60%' // 调整柱子宽度，占满可用空间
             }
         ]
     };
@@ -1155,7 +1146,6 @@ function renderReadStatisticsTable(data) {
             <td>${typeMap[item.announcement_type] || `类型${item.announcement_type}`}</td>
             <td>${new Date(item.publish_time).toLocaleString()}</td>
             <td>${item.read_count}</td>
-            <td>${item.unread_count}</td>
             <td>${item.total_users}</td>
         `;
         tbody.appendChild(row);

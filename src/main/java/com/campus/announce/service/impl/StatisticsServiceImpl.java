@@ -66,22 +66,6 @@ public class StatisticsServiceImpl implements StatisticsService {
             System.err.println("异常堆栈跟踪：");
             e.printStackTrace();
             
-            // 添加更详细的异常信息
-            System.err.println("异常根因：" + (e.getCause() != null ? e.getCause().getMessage() : "无"));
-            System.err.println("异常完整信息：" + e.toString());
-            
-            // 检查是否是SQL语法错误
-            if (e.getMessage().contains("SQL")) {
-                System.err.println("这是一个SQL相关的异常");
-            }
-            
-            // 检查是否是数据库连接错误
-            if (e.getMessage().contains("Connection") || e.getMessage().contains("connect")) {
-                System.err.println("这是一个数据库连接相关的异常");
-            }
-            
-            System.err.println("=== 异常日志结束 ===");
-            
             // 返回空列表，避免Controller层出现500错误
             System.out.println("异常处理：返回空列表");
             return new ArrayList<>();

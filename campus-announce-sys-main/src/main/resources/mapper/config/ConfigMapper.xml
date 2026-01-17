@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.campus.announce.mapper.config.ConfigMapper">
+
+    <select id="getValueByKey" resultType="string">
+        SELECT config_value FROM sys_config WHERE config_key = #{configKey}
+    </select>
+
+    <select id="getConfigByKey" resultType="map">
+        SELECT * FROM sys_config WHERE config_key = #{configKey}
+    </select>
+
+    <select id="getAllConfigs" resultType="map">
+        SELECT * FROM sys_config ORDER BY id
+    </select>
+
+    <update id="updateValue">
+        UPDATE sys_config SET config_value = #{configValue}, update_time = NOW()
+        WHERE config_key = #{configKey}
+    </update>
+    
+    <update id="updateConfig">
+        UPDATE sys_config SET config_value = #{configValue}, update_time = NOW()
+        WHERE config_key = #{configKey}
+    </update>
+
+    <insert id="insertConfig">
+        INSERT INTO sys_config (config_key, config_value, config_desc)
+        VALUES (#{configKey}, #{configValue}, #{configDesc})
+    </insert>
+
+</mapper>

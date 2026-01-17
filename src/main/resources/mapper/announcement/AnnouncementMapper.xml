@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.campus.announce.mapper.announcement.AnnouncementMapper">
+
+    <resultMap id="BaseResultMap" type="com.campus.announce.entity.Announcement">
+        <id column="id" property="id"/>
+        <result column="title" property="title"/>
+        <result column="content" property="content"/>
+        <result column="announcement_type" property="announcementType"/>
+        <result column="scope" property="scope"/>
+        <result column="dept_id" property="deptId"/>
+        <result column="publisher_id" property="publisherId"/>
+        <result column="publish_time" property="publishTime"/>
+        <result column="deadline" property="deadline"/>
+        <result column="is_top" property="isTop"/>
+        <result column="top_order" property="topOrder"/>
+        <result column="view_count" property="viewCount"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="publisher_name" property="publisherName"/>
+        <result column="dept_name" property="deptName"/>
+        <result column="dept_code" property="deptCode"/>
+        <result column="read_count" property="readCount"/>
+        <result column="unread_count" property="unreadCount"/>
+    </resultMap>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT a.*,
+               u.real_name as publisher_name,
+               d.dept_name,
+               d.dept_code
+        FROM sys_announcement a
+        LEFT JOIN sys_user u ON a.publisher_id = u.id
+        LEFT JOIN sys_department d ON a.dept_id = d.id
+        WHERE a.id = #{id}
+    </select>
+
+    <select id="selectByCondition" resultMap="BaseResultMap">
+        SELECT a.*,
+               u.real_name as publisher_name,
+               d.dept_name,
+               d.dept_code,
+               (SELECT COUNT(*) FROM sys_announcement_read ar WHERE ar.announcement_id = a.id) as read_count,
+               (SELECT COUNT(*) FROM sys_user WHERE user_type IN (3,4) AND status = 1) - (SELECT COUNT(*) FROM sys_announcement_read ar WHERE ar.announcement_id = a.id) as unread_count
+        FROM sys_announcement a
+        LEFT JOIN sys_user u ON a.publisher_id = u.id
+        LEFT JOIN sys_department d ON a.dept_id = d.id
+        WHERE a.status = 1
+        <if test="title != null and title != ''">
+            AND a.title LIKE CONCAT('%', #{title}, '%')
+        </if>
+        <if test="announcementType != null">
+            AND a.announcement_type = #{announcementType}
+        </if>
+        <if test="deptId != null">
+            AND a.dept_id = #{deptId}
+        </if>
+        <if test="scope != null">
+            AND a.scope = #{scope}
+        </if>
+        <if test="startTime != null">
+            AND a.publish_time &gt;= #{startTime}
+        </if>
+        <if test="endTime != null">
+            AND a.publish_time &lt;= #{endTime}
+        </if>
+        ORDER BY a.is_top DESC, a.top_order ASC, a.publish_time DESC
+    </select>
+
+    <select id="selectByScopeAndDept" resultMap="BaseResultMap">
+        SELECT a.*,
+               u.real_name as publisher_name,
+               d.dept_name,
+               d.dept_code
+        FROM sys_announcement a
+        LEFT JOIN sys_user u ON a.publisher_id = u.id
+        LEFT JOIN sys_department d ON a.dept_id = d.id
+        WHERE a.status = 1
+        AND a.scope = #{scope}
+        <if test="deptId != null">
+            AND a.dept_id = #{deptId}
+        </if>
+        ORDER BY a.is_top DESC, a.top_order ASC, a.publish_time DESC
+    </select>
+
+    <select id="selectTopAnnouncements" resultMap="BaseResultMap">
+        SELECT a.*,
+               u.real_name as publisher_name,
+               d.dept_name,
+               d.dept_code
+        FROM sys_announcement a
+        LEFT JOIN sys_user u ON a.publisher_id = u.id
+        LEFT JOIN sys_department d ON a.dept_id = d.id
+        WHERE a.status = 1
+        AND a.is_top = 1
+        AND a.scope = #{scope}
+        <if test="deptId != null">
+            AND a.dept_id = #{deptId}
+        </if>
+        ORDER BY a.top_order ASC
+        LIMIT #{limit}
+    </select>
+
+    <insert id="insert" parameterType="com.campus.announce.entity.Announcement" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_announcement (title, content, announcement_type, scope, dept_id, publisher_id, publish_time, deadline, is_top, top_order, status)
+        VALUES (#{title}, #{content}, #{announcementType}, #{scope}, #{deptId}, #{publisherId}, #{publishTime}, #{deadline}, #{isTop}, #{topOrder}, #{status})
+    </insert>
+
+    <update id="update" parameterType="com.campus.announce.entity.Announcement">
+        UPDATE sys_announcement
+        <set>
+            <if test="title != null">title = #{title},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="announcementType != null">announcement_type = #{announcementType},</if>
+            <if test="scope != null">scope = #{scope},</if>
+            <if test="deptId != null">dept_id = #{deptId},</if>
+            <if test="deadline != null">deadline = #{deadline},</if>
+            <if test="isTop != null">is_top = #{isTop},</if>
+            <if test="topOrder != null">top_order = #{topOrder},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        UPDATE sys_announcement SET status = 0 WHERE id = #{id}
+    </delete>
+
+    <update id="updateTopStatus">
+        UPDATE sys_announcement
+        SET is_top = #{isTop}, top_order = #{topOrder}
+        WHERE id = #{id}
+    </update>
+
+    <update id="incrementViewCount">
+        UPDATE sys_announcement SET view_count = view_count + 1 WHERE id = #{id}
+    </update>
+
+    <select id="countByTypeAndDept" resultType="int">
+        SELECT COUNT(*) FROM sys_announcement
+        WHERE status = 1
+        AND announcement_type = #{announcementType}
+        <if test="deptId != null">
+            AND dept_id = #{deptId}
+        </if>
+    </select>
+
+    <select id="countByTimeRange" resultType="int">
+        SELECT COUNT(*) FROM sys_announcement
+        WHERE status = 1
+        AND publish_time &gt;= #{startTime}
+        AND publish_time &lt;= #{endTime}
+        <if test="deptId != null">
+            AND dept_id = #{deptId}
+        </if>
+    </select>
+
+</mapper>

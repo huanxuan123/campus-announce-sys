@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.campus.announce.mapper.statistics.StatisticsMapper">
+
+    <select id="countByAnnouncementType" resultType="map">
+        SELECT
+            announcement_type,
+            COUNT(*) as count
+        FROM sys_announcement
+        WHERE status = 1
+        <if test="deptId != null">
+            AND dept_id = #{deptId}
+        </if>
+        GROUP BY announcement_type
+    </select>
+
+    <select id="countByDepartment" resultType="map">
+        SELECT
+            d.dept_name,
+            d.dept_code,
+            COUNT(a.id) as announcement_count
+        FROM sys_department d
+        LEFT JOIN sys_announcement a ON d.id = a.dept_id AND a.status = 1
+        GROUP BY d.id, d.dept_name, d.dept_code
+        ORDER BY announcement_count DESC
+    </select>
+
+    <select id="countByDepartmentForDeptAdmin" resultType="map">
+        SELECT
+            d.dept_name,
+            d.dept_code,
+            COUNT(a.id) as announcement_count
+        FROM sys_department d
+        LEFT JOIN sys_announcement a ON d.id = a.dept_id AND a.status = 1
+        WHERE d.id = #{deptId}
+        GROUP BY d.id, d.dept_name, d.dept_code
+    </select>
+
+    <select id="countByTimeRange" resultType="map">
+        SELECT
+            DATE(publish_time) as publish_date,
+            COUNT(*) as count
+        FROM sys_announcement
+        WHERE status = 1
+        AND publish_time &gt;= #{startTime}
+        AND publish_time &lt;= #{endTime}
+        <if test="deptId != null">
+            AND dept_id = #{deptId}
+        </if>
+        GROUP BY DATE(publish_time)
+        ORDER BY publish_date ASC
+    </select>
+
+    <select id="getTotalStatistics" resultType="map">
+        SELECT
+            COUNT(*) as total_announcements,
+            SUM(CASE WHEN is_top = 1 THEN 1 ELSE 0 END) as top_announcements,
+            SUM(view_count) as total_views,
+            AVG(view_count) as avg_views
+        FROM sys_announcement
+        WHERE status = 1
+        <if test="deptId != null">
+            AND dept_id = #{deptId}
+        </if>
+    </select>
+
+    <select id="getAnnouncementReadStatistics" resultType="map">
+        SELECT
+            a.id as announcement_id,
+            a.title,
+            a.announcement_type,
+            a.publish_time,
+            (SELECT COUNT(*) FROM sys_announcement_read ar WHERE ar.announcement_id = a.id) as read_count,
+            (SELECT COUNT(*) FROM sys_user WHERE user_type IN (3,4) AND status = 1) as total_users,
+            (SELECT COUNT(*) FROM sys_user WHERE user_type IN (3,4) AND status = 1) - (SELECT COUNT(*) FROM sys_announcement_read ar WHERE ar.announcement_id = a.id) as unread_count
+        FROM sys_announcement a
+        WHERE a.status = 1
+        <if test="announcementId != null">
+            AND a.id = #{announcementId}
+        </if>
+        ORDER BY a.publish_time DESC
+    </select>
+
+    <select id="getDepartmentAnnouncementStatistics" resultType="map">
+        SELECT
+            d.dept_name,
+            d.dept_code,
+            COUNT(a.id) as announcement_count,
+            SUM(CASE WHEN a.announcement_type = 1 THEN 1 ELSE 0 END) as notice_count,
+            SUM(CASE WHEN a.announcement_type = 2 THEN 1 ELSE 0 END) as activity_count,
+            SUM(CASE WHEN a.announcement_type = 3 THEN 1 ELSE 0 END) as other_count
+        FROM sys_department d
+        LEFT JOIN sys_announcement a ON d.id = a.dept_id AND a.status = 1
+        GROUP BY d.id, d.dept_name, d.dept_code
+        ORDER BY announcement_count DESC
+    </select>
+
+</mapper>

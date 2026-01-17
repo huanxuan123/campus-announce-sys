@@ -66,14 +66,15 @@
     </select>
 
     <select id="getAnnouncementReadStatistics" resultType="map">
+        <!-- 查询公告阅读统计数据 -->
         SELECT
             a.id as announcement_id,
             a.title,
             a.announcement_type,
-            a.publish_time,
-            (SELECT COUNT(*) FROM sys_announcement_read ar WHERE ar.announcement_id = a.id) as read_count,
-            (SELECT COUNT(*) FROM sys_user WHERE user_type IN (3,4) AND status = 1) as total_users,
-            (SELECT COUNT(*) FROM sys_user WHERE user_type IN (3,4) AND status = 1) - (SELECT COUNT(*) FROM sys_announcement_read ar WHERE ar.announcement_id = a.id) as unread_count
+            UNIX_TIMESTAMP(a.publish_time) * 1000 as publish_time,
+            a.view_count as read_count,
+            (SELECT COUNT(*) FROM sys_user WHERE status = 1) as total_users,
+            (SELECT COUNT(*) FROM sys_user WHERE status = 1) - a.view_count as unread_count
         FROM sys_announcement a
         WHERE a.status = 1
         <if test="announcementId != null">

@@ -695,6 +695,16 @@
                             <option value="2">活动</option>
                             <option value="3">其他</option>
                         </select>
+                        <select class="search-select" id="deptFilter">
+                            <option value="">全部院系</option>
+                            <option value="1">计算机学院</option>
+                            <option value="2">软件学院</option>
+                            <option value="3">信息工程学院</option>
+                            <option value="4">电子工程学院</option>
+                            <option value="5">机械工程学院</option>
+                        </select>
+                        <input type="date" class="search-select" placeholder="开始时间" id="startTime">
+                        <input type="date" class="search-select" placeholder="结束时间" id="endTime">
                         <button class="btn-search" onclick="AnnouncementList.searchAnnouncements()">
                             <i class="fas fa-search"></i> 搜索
                         </button>

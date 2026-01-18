@@ -94,7 +94,15 @@ const AnnouncementList = {
         this.isLoading = true;
         Logger.log('开始加载公告列表');
         
+        // 获取筛选条件
+        const deptFilter = document.getElementById('deptFilter')?.value || '';
+        const startTime = document.getElementById('startTime')?.value || '';
+        const endTime = document.getElementById('endTime')?.value || '';
+        
         const params = {
+            deptId: deptFilter,
+            startTime: startTime,
+            endTime: endTime
         };
         
         ApiClient.get('/announcement/list', params)
@@ -258,6 +266,9 @@ const AnnouncementList = {
     searchAnnouncements: function() {
         const keyword = document.getElementById('searchKeyword')?.value.toLowerCase() || '';
         const type = document.getElementById('typeFilter')?.value || '';
+        const dept = document.getElementById('deptFilter')?.value || '';
+        const startTime = document.getElementById('startTime')?.value || '';
+        const endTime = document.getElementById('endTime')?.value || '';
         
         let filtered = this.currentAnnouncements;
         
@@ -270,6 +281,27 @@ const AnnouncementList = {
         
         if (type) {
             filtered = filtered.filter(ann => ann.announcementType == type);
+        }
+        
+        if (dept) {
+            filtered = filtered.filter(ann => ann.deptId == dept);
+        }
+        
+        if (startTime) {
+            const start = new Date(startTime);
+            filtered = filtered.filter(ann => {
+                const publishTime = new Date(ann.publishTime);
+                return publishTime >= start;
+            });
+        }
+        
+        if (endTime) {
+            const end = new Date(endTime);
+            end.setHours(23, 59, 59, 999); // 设置为当天结束时间
+            filtered = filtered.filter(ann => {
+                const publishTime = new Date(ann.publishTime);
+                return publishTime <= end;
+            });
         }
         
         this.renderAnnouncements(filtered);
@@ -293,6 +325,10 @@ const AnnouncementList = {
         
         // 执行筛选
         const keyword = document.getElementById('searchKeyword')?.value.toLowerCase() || '';
+        const dept = document.getElementById('deptFilter')?.value || '';
+        const startTime = document.getElementById('startTime')?.value || '';
+        const endTime = document.getElementById('endTime')?.value || '';
+        
         let filtered = this.currentAnnouncements;
         
         if (keyword) {
@@ -304,6 +340,27 @@ const AnnouncementList = {
         
         if (type) {
             filtered = filtered.filter(ann => ann.announcementType == type);
+        }
+        
+        if (dept) {
+            filtered = filtered.filter(ann => ann.deptId == dept);
+        }
+        
+        if (startTime) {
+            const start = new Date(startTime);
+            filtered = filtered.filter(ann => {
+                const publishTime = new Date(ann.publishTime);
+                return publishTime >= start;
+            });
+        }
+        
+        if (endTime) {
+            const end = new Date(endTime);
+            end.setHours(23, 59, 59, 999); // 设置为当天结束时间
+            filtered = filtered.filter(ann => {
+                const publishTime = new Date(ann.publishTime);
+                return publishTime <= end;
+            });
         }
         
         this.renderAnnouncements(filtered);
@@ -353,6 +410,29 @@ const AnnouncementList = {
             typeFilter.addEventListener('change', () => {
                 this.currentFilterType = typeFilter.value;
                 this.updateFilterButtons(typeFilter.value);
+                this.searchAnnouncements();
+            });
+        }
+        
+        // 新增：绑定院系筛选事件
+        const deptFilter = document.getElementById('deptFilter');
+        if (deptFilter) {
+            deptFilter.addEventListener('change', () => {
+                this.searchAnnouncements();
+            });
+        }
+        
+        // 新增：绑定时间筛选事件
+        const startTime = document.getElementById('startTime');
+        if (startTime) {
+            startTime.addEventListener('change', () => {
+                this.searchAnnouncements();
+            });
+        }
+        
+        const endTime = document.getElementById('endTime');
+        if (endTime) {
+            endTime.addEventListener('change', () => {
                 this.searchAnnouncements();
             });
         }

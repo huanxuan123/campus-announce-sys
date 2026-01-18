@@ -7,20 +7,62 @@ const AnnouncementAdminDetail = {
     announcement: null,
     attachments: [],
     isEditing: false,
+    departments: [],
     
     init: function() {
         Logger.log('管理员公告详情页面初始化');
         
+        // 加载院系列表
+        this.loadDepartments();
+        
         const urlParams = new URLSearchParams(window.location.search);
         this.announcementId = urlParams.get('id');
         
-        if (!this.announcementId) {
-            this.showError('缺少公告ID参数');
-            return;
+        if (this.announcementId) {
+            // 编辑现有公告模式
+            Logger.log('公告ID', this.announcementId);
+            this.loadAnnouncementDetail();
+        } else {
+            // 创建新公告模式
+            this.isEditing = true;
         }
+    },
+    
+    /**
+     * 加载院系列表
+     */
+    loadDepartments: function() {
+        Logger.log('开始加载院系列表');
         
-        Logger.log('公告ID', this.announcementId);
-        this.loadAnnouncementDetail();
+        ApiClient.get('/department/list')
+            .then(data => {
+                if (data.data && Array.isArray(data.data)) {
+                    this.departments = data.data;
+                    Logger.log('院系列表加载成功', { count: this.departments.length });
+                    
+                    // 如果是创建新公告模式，渲染表单
+                    if (!this.announcementId && this.isEditing) {
+                        this.renderPublishForm();
+                    }
+                } else {
+                    Logger.warn('API返回的数据格式不正确', data);
+                    this.departments = [];
+                    
+                    // 如果是创建新公告模式，渲染表单
+                    if (!this.announcementId && this.isEditing) {
+                        this.renderPublishForm();
+                    }
+                }
+            })
+            .catch(error => {
+                Logger.error('加载院系列表失败', error);
+                this.departments = [];
+                
+                // 如果是创建新公告模式，渲染表单
+                if (!this.announcementId && this.isEditing) {
+                    this.renderPublishForm();
+                }
+            });
     },
     
     loadAnnouncementDetail: function() {
@@ -81,9 +123,18 @@ const AnnouncementAdminDetail = {
                 
                 <div class="form-group">
                     <label class="form-label">公告范围</label>
-                    <select class="form-select" id="editScope">
+                    <select class="form-select" id="editScope" onchange="AnnouncementAdminDetail.toggleDepartmentSelect()">
                         <option value="1" ${ann.scope == 1 ? 'selected' : ''}>全校</option>
                         <option value="2" ${ann.scope == 2 ? 'selected' : ''}>院系</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" id="departmentSelectGroup" ${ann.scope == 2 ? '' : 'style="display: none;"'}>
+                    <label class="form-label">所属院系</label>
+                    <select class="form-select" id="editDeptId">
+                        ${this.departments.map(dept => `
+                        <option value="${dept.id}" ${ann.deptId == dept.id ? 'selected' : ''}>${ErrorHandler.escapeHtml(dept.deptName)}</option>
+                        `).join('')}
                     </select>
                 </div>
                 
@@ -266,12 +317,30 @@ const AnnouncementAdminDetail = {
         container.innerHTML = `<div class="attachment-list">${html}</div>`;
     },
     
+    /**
+     * 切换院系选择框显示状态
+     */
+    toggleDepartmentSelect: function() {
+        const scope = document.getElementById('editScope').value;
+        const departmentSelectGroup = document.getElementById('departmentSelectGroup');
+        const deptSelect = document.getElementById('editDeptId');
+        
+        if (scope == '2') {
+            departmentSelectGroup.style.display = 'block';
+            deptSelect.setAttribute('required', 'required');
+        } else {
+            departmentSelectGroup.style.display = 'none';
+            deptSelect.removeAttribute('required');
+        }
+    },
+    
     saveAnnouncement: function() {
-        Logger.log('保存公告修改');
+        Logger.log(this.announcementId ? '保存公告修改' : '发布新公告');
         
         const title = document.getElementById('editTitle').value.trim();
         const announcementType = parseInt(document.getElementById('editAnnouncementType').value);
         const scope = parseInt(document.getElementById('editScope').value);
+        const deptId = document.getElementById('editDeptId')?.value;
         const deadline = document.getElementById('editDeadline').value;
         const isTop = parseInt(document.getElementById('editIsTop').value);
         const topOrder = parseInt(document.getElementById('editTopOrder').value);
@@ -287,8 +356,12 @@ const AnnouncementAdminDetail = {
             return;
         }
         
-        const updateData = {
-            id: this.announcementId,
+        if (scope == 2 && !deptId) {
+            ErrorHandler.showError('请选择所属院系');
+            return;
+        }
+        
+        const announcementData = {
             title: title,
             announcementType: announcementType,
             scope: scope,
@@ -297,19 +370,40 @@ const AnnouncementAdminDetail = {
             content: content
         };
         
-        if (deadline) {
-            updateData.deadline = deadline;
+        if (deptId) {
+            announcementData.deptId = parseInt(deptId);
         }
         
-        ApiClient.put('/announcement/' + this.announcementId, updateData)
-            .then(() => {
-                ErrorHandler.showSuccess('公告修改成功');
+        if (deadline) {
+            announcementData.deadline = deadline;
+        }
+        
+        let apiPromise;
+        if (this.announcementId) {
+            // 编辑现有公告
+            apiPromise = ApiClient.put('/announcement/' + this.announcementId, announcementData);
+        } else {
+            // 创建新公告
+            apiPromise = ApiClient.post('/announcement', announcementData);
+        }
+        
+        apiPromise.then(() => {
+            const successMsg = this.announcementId ? '公告修改成功' : '公告发布成功';
+            ErrorHandler.showSuccess(successMsg);
+            
+            if (this.announcementId) {
+                // 编辑模式：重新加载详情
                 this.loadAnnouncementDetail();
-            })
-            .catch(error => {
-                Logger.error('保存公告失败', error);
-                ErrorHandler.showError('保存失败：' + error.message);
-            });
+            } else {
+                // 创建模式：跳转到公告列表
+                const basePath = AppConfig.apiBaseUrl.replace('/api', '') || '';
+                window.location.href = basePath + '/announcement-list.jsp';
+            }
+        })
+        .catch(error => {
+            Logger.error('保存公告失败', error);
+            ErrorHandler.showError('保存失败：' + error.message);
+        });
     },
     
     deleteAnnouncement: function() {
@@ -354,6 +448,91 @@ const AnnouncementAdminDetail = {
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         
         return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    },
+    
+    /**
+     * 渲染发布新公告表单
+     */
+    renderPublishForm: function() {
+        const container = document.getElementById('mainContent');
+        if (!container) {
+            Logger.error('找不到mainContent容器');
+            return;
+        }
+        
+        const html = `
+            <div class="card card-full">
+                <div class="card-title">
+                    <span>📝 发布新公告</span>
+                    <div style="margin-left: auto; display: flex; gap: 8px;">
+                        <button class="btn btn-success" onclick="AnnouncementAdminDetail.saveAnnouncement()">
+                            <i class="fas fa-paper-plane"></i> 发布公告
+                        </button>
+                        <button class="btn btn-secondary" onclick="window.history.back()">
+                            <i class="fas fa-arrow-left"></i> 返回
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">公告标题 *</label>
+                    <input type="text" class="form-input" id="editTitle" placeholder="请输入公告标题">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">公告类型 *</label>
+                    <select class="form-select" id="editAnnouncementType">
+                        <option value="1" selected>通知</option>
+                        <option value="2">活动</option>
+                        <option value="3">其他</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">公告范围 *</label>
+                    <select class="form-select" id="editScope" onchange="AnnouncementAdminDetail.toggleDepartmentSelect()">
+                        <option value="1" selected>全校</option>
+                        <option value="2">院系</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" id="departmentSelectGroup" style="display: none;">
+                    <label class="form-label">所属院系 *</label>
+                    <select class="form-select" id="editDeptId">
+                        <option value="" selected>请选择院系</option>
+                        ${this.departments.map(dept => `
+                        <option value="${dept.id}">${ErrorHandler.escapeHtml(dept.deptName)}</option>
+                        `).join('')}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">截止时间</label>
+                    <input type="datetime-local" class="form-input" id="editDeadline">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">是否置顶</label>
+                    <select class="form-select" id="editIsTop">
+                        <option value="0" selected>否</option>
+                        <option value="1">是</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">置顶顺序</label>
+                    <input type="number" class="form-input" id="editTopOrder" value="0" min="0">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">公告内容 *</label>
+                    <textarea class="form-textarea" id="editContent" placeholder="请输入公告内容" rows="10"></textarea>
+                </div>
+            </div>
+        `;
+        
+        container.innerHTML = html;
+        document.title = '发布新公告 - 校园公告系统';
     },
     
     showError: function(message) {

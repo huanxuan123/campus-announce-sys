@@ -45,16 +45,19 @@ const AnnouncementList = {
                     this.currentUser = data.data;
                     this.updateUserDisplay();
                     this.updateSystemSettingsButton();
+                    this.updatePublishButton();
                 } else {
                     this.currentUser = null;
                     document.getElementById('userName').textContent = '未登录';
                     this.updateSystemSettingsButton();
+                    this.updatePublishButton();
                 }
             })
             .catch(error => {
                 Logger.error('加载用户信息失败', error);
                 document.getElementById('userName').textContent = '未登录';
                 this.updateSystemSettingsButton();
+                this.updatePublishButton();
             });
     },
     
@@ -70,6 +73,29 @@ const AnnouncementList = {
                 settingsBtn.style.display = 'none';
             }
         }
+    },
+    
+    /**
+     * 更新发布公告按钮显示状态
+     */
+    updatePublishButton: function() {
+        const publishBtn = document.getElementById('publishBtn');
+        if (publishBtn) {
+            if (this.currentUser && (this.currentUser.userType === 1 || this.currentUser.userType === 2)) {
+                publishBtn.style.display = 'inline-flex';
+            } else {
+                publishBtn.style.display = 'none';
+            }
+        }
+    },
+    
+    /**
+     * 显示发布公告表单
+     */
+    showPublishForm: function() {
+        Logger.log('显示发布公告表单');
+        const contextPath = AppConfig.apiBaseUrl.replace('/api', '') || '';
+        window.location.href = contextPath + '/announcement-admin-detail.jsp';
     },
     
     /**

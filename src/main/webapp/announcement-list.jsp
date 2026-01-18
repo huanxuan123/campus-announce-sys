@@ -637,6 +637,9 @@
                         <i class="fas fa-user-circle"></i>
                         <span id="userName">加载中...</span>
                     </div>
+                    <button id="publishBtn" onclick="AnnouncementList.showPublishForm()" class="btn btn-primary" style="display: none;">
+                        <i class="fas fa-plus"></i> 发布公告
+                    </button>
                     <button onclick="AnnouncementList.logout()" class="btn btn-secondary">
                         <i class="fas fa-sign-out-alt"></i> 退出
                     </button>

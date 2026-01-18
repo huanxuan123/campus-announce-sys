@@ -52,6 +52,7 @@ public class AnnouncementServiceImpl implements AnnouncementService {
     @Override
     @Transactional
     public int createAnnouncement(Announcement announcement) {
+        announcement.setStatus(1);
         return announcementMapper.insert(announcement);
     }
 
@@ -67,6 +68,7 @@ public class AnnouncementServiceImpl implements AnnouncementService {
             throw new RuntimeException("师生不能发布公告");
         }
         
+        announcement.setStatus(1);
         announcement.setPublishTime(new Date());
         return announcementMapper.insert(announcement);
     }

@@ -316,23 +316,7 @@ mvn clean package
 http://localhost:8080/campus-announce-sys/
 ```
 
-## 待实现功能
 
-- [ ] Service层实现
-- [ ] Controller层实现
-- [ ] JSP页面开发
-- [ ] 文件上传功能
-- [ ] 邮件发送功能（密码找回）
-- [ ] 单元测试
-- [ ] 日志记录完善
-
-## 注意事项
-
-1. 密码需要加密存储（建议使用BCrypt）
-2. 文件上传需要限制大小和类型
-3. 敏感信息不要提交到Git
-4. 定期备份数据库
-5. 注意SQL注入防护（使用MyBatis参数化查询）
 
 ## 联系方式
 
